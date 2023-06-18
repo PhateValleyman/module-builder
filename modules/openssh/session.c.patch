@@ -6,7 +6,7 @@ diff -uNr openssh-8.0p1/session.c openssh-8.0p1.mod/session.c
  
  	/* Allocate a buffer for the socket name, and format the name. */
 -	auth_sock_dir = xstrdup("/tmp/ssh-XXXXXXXXXX");
-+	auth_sock_dir = xstrdup("/sdcard/tmp/ssh-XXXXXXXXXX");
++	auth_sock_dir = xstrdup("@TERMUX_PREFIX@/tmp/ssh-XXXXXXXXXX");
  
  	/* Create private directory for socket */
  	if (mkdtemp(auth_sock_dir) == NULL) {
@@ -15,7 +15,7 @@ diff -uNr openssh-8.0p1/session.c openssh-8.0p1.mod/session.c
  
  	temporarily_use_uid(pw);
 -	auth_info_file = xstrdup("/tmp/sshauth.XXXXXXXXXXXXXXX");
-+	auth_info_file = xstrdup("/sdcard/tmp/sshauth.XXXXXXXXXXXXXXX");
++	auth_info_file = xstrdup("@TERMUX_PREFIX@/tmp/sshauth.XXXXXXXXXXXXXXX");
  	if ((fd = mkstemp(auth_info_file)) == -1) {
  		error("%s: mkstemp: %s", __func__, strerror(errno));
  		goto out;
@@ -26,7 +26,7 @@ diff -uNr openssh-8.0p1/session.c openssh-8.0p1.mod/session.c
 +#ifdef __ANDROID__
 +		// Normally this environment variable should be already unset, but
 +		// doing this anyway.
-+		unsetenv("MAGISK_HUSHLOGIN");
++		unsetenv("TERMUX_HUSHLOGIN");
 +#else
  #ifdef HAVE_LOGIN_CAP
  		f = fopen(login_getcapstr(lc, "welcome", "/etc/motd",
@@ -40,7 +40,7 @@ diff -uNr openssh-8.0p1/session.c openssh-8.0p1.mod/session.c
 +#ifdef __ANDROID__
 +	else {
 +		// Tell Termux login script not to display motd.
-+		setenv("MAGISK_HUSHLOGIN", "1", 1);
++		setenv("TERMUX_HUSHLOGIN", "1", 1);
 +	}
 +#endif
  }
@@ -65,7 +65,7 @@ diff -uNr openssh-8.0p1/session.c openssh-8.0p1.mod/session.c
  
  
 +#ifdef __ANDROID__
-+	char const* envs_to_keep[] = {"ANDROID_ART_ROOT", "ANDROID_DATA", "ANDROID_I18N_ROOT", "ANDROID_ROOT", "ANDROID_RUNTIME_ROOT", "ANDROID_TZDATA_ROOT", "BOOTCLASSPATH", "DEX2OATBOOTCLASSPATH", "EXTERNAL_STORAGE", "LANG", "LD_LIBRARY_PATH", "PATH", "PREFIX", "MAGISK_HUSHLOGIN", "TMPDIR"};
++	char const* envs_to_keep[] = {"ANDROID_ART_ROOT", "ANDROID_DATA", "ANDROID_I18N_ROOT", "ANDROID_ROOT", "ANDROID_RUNTIME_ROOT", "ANDROID_TZDATA_ROOT", "BOOTCLASSPATH", "DEX2OATBOOTCLASSPATH", "EXTERNAL_STORAGE", "LANG", "LD_LIBRARY_PATH", "PATH", "PREFIX", "TERMUX_HUSHLOGIN", "TERMUX_VERSION", "TMPDIR"};
 +	for (i = 0; i < (sizeof(envs_to_keep) / sizeof(envs_to_keep[0])); i++) {
 +		char const* env_to_keep_name = envs_to_keep[i];
 +		char const* env_to_keep_value = getenv(env_to_keep_name);

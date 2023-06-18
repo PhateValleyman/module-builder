@@ -1,13 +1,40 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/sharkdp/fd
-MAGISK_MODULE_DESCRIPTION="Simple, fast and user-friendly alternative to find"
-MAGISK_MODULE_LICENSE="Apache-2.0"
-MAGISK_MODULE_VERSION=8.2.1
-MAGISK_MODULE_SRCURL=https://github.com/sharkdp/fd/archive/v$MAGISK_MODULE_VERSION.tar.gz
-MAGISK_MODULE_SHA256=429de7f04a41c5ee6579e07a251c72342cd9cf5b11e6355e861bb3fffa794157
-MAGISK_MODULE_BUILD_IN_SRC=true
+TERMUX_PKG_HOMEPAGE=https://github.com/sharkdp/fd
+TERMUX_PKG_DESCRIPTION="Simple, fast and user-friendly alternative to find"
+TERMUX_PKG_LICENSE="Apache-2.0,MIT"
+TERMUX_PKG_LICENSE_FILE="LICENSE-APACHE,LICENSE-MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION="8.7.0"
+TERMUX_PKG_SRCURL=https://github.com/sharkdp/fd/archive/v${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=13da15f3197d58a54768aaad0099c80ad2e9756dd1b0c7df68c413ad2d5238c9
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_BUILD_IN_SRC=true
 
-magisk_step_post_make_install() {
-        mkdir -p $MAGISK_PREFIX/usr/share/man/man1
-        cp $(find . -name fd.1) $MAGISK_PREFIX/usr/share/man/man1/
+termux_step_make() {
+	termux_setup_rust
+	cargo build --jobs $TERMUX_MAKE_PROCESSES --target $CARGO_TARGET_NAME --release
 }
 
+termux_step_make_install() {
+	install -Dm700 -t $TERMUX_PREFIX/bin target/${CARGO_TARGET_NAME}/release/fd
+
+	install -Dm644 /dev/null "${TERMUX_PREFIX}"/share/bash-completion/completions/"${TERMUX_PKG_NAME}".bash
+	install -Dm644 /dev/null "${TERMUX_PREFIX}"/share/zsh/site-functions/_"${TERMUX_PKG_NAME}"
+	install -Dm644 /dev/null "${TERMUX_PREFIX}"/share/fish/vendor_completions.d/"${TERMUX_PKG_NAME}".fish
+}
+
+termux_step_post_make_install() {
+	# Manpages.
+	install -Dm600 doc/"${TERMUX_PKG_NAME}".1 \
+		"${TERMUX_PREFIX}"/share/man/man1/"${TERMUX_PKG_NAME}".1
+	
+	install -Dm600 contrib/completion/_"${TERMUX_PKG_NAME}" \
+		"${TERMUX_PREFIX}"/share/zsh/site-functions/_"${TERMUX_PKG_NAME}"
+}
+
+termux_step_create_debscripts() {
+	cat <<- EOF > ./postinst
+		#!${TERMUX_PREFIX}/bin/sh
+		fd --gen-completions bash > ${TERMUX_PREFIX}/share/bash-completion/completions/fd.bash
+		fd --gen-completions fish > ${TERMUX_PREFIX}/share/fish/vendor_completions.d/fd.fish
+	EOF
+}

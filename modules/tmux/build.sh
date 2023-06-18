@@ -1,27 +1,37 @@
-MAGISK_MODULE_HOMEPAGE=https://tmux.github.io/
-MAGISK_MODULE_DESCRIPTION="Terminal multiplexer"
-MAGISK_MODULE_LICENSE="BSD"
-MAGISK_MODULE_DEPENDS="ncurses, libevent, libandroid-support, libandroid-glob"
-MAGISK_MODULE_VERSION=3.1b
-MAGISK_MODULE_REVISION=2
-MAGISK_MODULE_SRCURL=https://github.com/tmux/tmux/archive/${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=100d0a11a822927172e8b983b5f9401476bd9f2cfa6758512f762b9ad74f9536
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="--enable-static --disable-shared"
-MAGISK_MODULE_BUILD_IN_SRC=true
+TERMUX_PKG_HOMEPAGE=https://tmux.github.io/
+TERMUX_PKG_DESCRIPTION="Terminal multiplexer"
+TERMUX_PKG_LICENSE="ISC"
+TERMUX_PKG_MAINTAINER="@termux"
+# Link against libandroid-support for wcwidth(), see https://github.com/termux/termux-packages/issues/224
+TERMUX_PKG_DEPENDS="ncurses, libevent, libandroid-support, libandroid-glob"
+TERMUX_PKG_VERSION=3.3a
+TERMUX_PKG_SRCURL="https://github.com/tmux/tmux/archive/${TERMUX_PKG_VERSION}.tar.gz"
+TERMUX_PKG_SHA256=f9687493203f86d346791a9327cde9148b9b4be959381b1effc575a9364a043f
+TERMUX_PKG_AUTO_UPDATE=true
+# Set default TERM to screen-256color, see: https://raw.githubusercontent.com/tmux/tmux/3.3/CHANGES
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-static --with-TERM=screen-256color"
+TERMUX_PKG_BUILD_IN_SRC=true
 
-MAGISK_MODULE_CONFFILES="etc/tmux.conf"
+TERMUX_PKG_CONFFILES="etc/tmux.conf etc/profile.d/tmux.sh"
 
-magisk_step_pre_configure() {
+termux_step_pre_configure() {
 	LDFLAGS+=" -landroid-glob"
 	./autogen.sh
 }
 
-magisk_step_post_make_install() {
-	cp $MAGISK_MODULE_BUILDER_DIR/tmux.conf $MAGISK_PREFIX/etc/tmux.conf
+termux_step_post_make_install() {
+	cp "$TERMUX_PKG_BUILDER_DIR"/tmux.conf "$TERMUX_PREFIX"/etc/tmux.conf
 
-	mkdir -p $MAGISK_PREFIX/usr/share/bash-completion/completions
-	magisk_download \
+	mkdir -p "$TERMUX_PREFIX"/etc/profile.d
+	echo "export TMUX_TMPDIR=$TERMUX_PREFIX/var/run" > "$TERMUX_PREFIX"/etc/profile.d/tmux.sh
+
+	mkdir -p "$TERMUX_PREFIX"/share/bash-completion/completions
+	termux_download \
 		https://raw.githubusercontent.com/imomaliev/tmux-bash-completion/homebrew_1.0.0/completions/tmux \
-		$MAGISK_PREFIX/usr/share/bash-completion/completions/tmux \
+		"$TERMUX_PREFIX"/share/bash-completion/completions/tmux \
 		05e79fc1ecb27637dc9d6a52c315b8f207cf010cdcee9928805525076c9020ae
+}
+
+termux_step_post_massage() {
+	mkdir -p "${TERMUX_PKG_MASSAGEDIR}/${TERMUX_PREFIX}"/var/run
 }

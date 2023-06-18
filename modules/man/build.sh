@@ -1,37 +1,35 @@
-MAGISK_MODULE_HOMEPAGE=https://mdocml.bsd.lv/
-MAGISK_MODULE_DESCRIPTION="Man page viewer from the mandoc toolset"
-MAGISK_MODULE_LICENSE="BSD 3-Clause"
-MAGISK_MODULE_VERSION=1.14.5
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SHA256=8219b42cb56fc07b2aa660574e6211ac38eefdbf21f41b698d3348793ba5d8f7
-MAGISK_MODULE_SRCURL=http://mdocml.bsd.lv/snapshots/mandoc-${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_DEPENDS="less,libandroid-glob,zlib"
-MAGISK_MODULE_BUILD_IN_SRC=yes
-MAGISK_MODULE_RM_AFTER_INSTALL="usr/share/examples"
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS=" --enable-shared"
+TERMUX_PKG_HOMEPAGE=https://mdocml.bsd.lv/
+TERMUX_PKG_DESCRIPTION="Man page viewer from the mandoc toolset"
+TERMUX_PKG_LICENSE="ISC, BSD 2-Clause, BSD 3-Clause"
+TERMUX_PKG_LICENSE_FILE="LICENSE"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.14.6
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=http://mdocml.bsd.lv/snapshots/mandoc-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=8bf0d570f01e70a6e124884088870cbed7537f36328d512909eb10cd53179d9c
+TERMUX_PKG_DEPENDS="less,libandroid-glob,zlib"
+TERMUX_PKG_BUILD_IN_SRC=true
+TERMUX_PKG_RM_AFTER_INSTALL="share/examples"
 
-magisk_step_pre_configure() {
-	#sudo rm $MAGISK_MODULE_SRCDIR/compat_*;
-	#LDFLAGS+=" -static"
-	echo "PREFIX=\"$MAGISK_PREFIX\"" > configure.local
+termux_step_pre_configure() {
+	CPPFLAGS+=" -DBIONIC_IOCTL_NO_SIGNEDNESS_OVERLOAD"
+	LDFLAGS+=" -landroid-glob"
+	echo "PREFIX=\"$TERMUX_PREFIX\"" > configure.local
 	echo "CC=\"$CC\"" >> configure.local
-	echo "LD=\"$CC\"" >> configure.local
-	echo "MANDIR=\"/data/man\"" >> configure.local
-	#echo "CFLAGS=\"$CFLAGS -DNULL=0\"" >> configure.local
-	echo "LDFLAGS=\"$LDFLAGS --static\"" >> configure.local
-	#echo "STATIC=\"-static\"" >> configure.local
-	echo "LDADD=\" -landroid-glob -lc\"" >> configure.local
-	for HAVING in HAVE_REALLOCARRAY HAVE_GETLINE HAVE_FGETLN HAVE_MMAP HAVE_STRLCAT HAVE_STRLCPY HAVE_SYS_ENDIAN HAVE_ENDIAN HAVE_NTOHL HAVE_NANOSLEEP HAVE_O_DIRECTORY HAVE_MKDTEMP; do
+	echo "MANDIR=\"$TERMUX_PREFIX/share/man\"" >> configure.local
+	echo "CFLAGS=\"$CFLAGS -std=c99 -DNULL=0 $CPPFLAGS\"" >> configure.local
+	echo "LDFLAGS=\"$LDFLAGS\"" >> configure.local
+	for HAVING in HAVE_FGETLN HAVE_MMAP HAVE_STRLCAT HAVE_STRLCPY HAVE_SYS_ENDIAN HAVE_ENDIAN HAVE_NTOHL HAVE_NANOSLEEP HAVE_O_DIRECTORY HAVE_ISBLANK; do
 		echo "$HAVING=1" >> configure.local
 	done
 	echo "HAVE_MANPATH=0" >> configure.local
-	echo "HAVE_STRINGLIST=0" >> configure.local
 	echo "HAVE_SQLITE3=1" >> configure.local
-	printenv >> config.env
 }
 
-magisk_step_create_zipscripts() {
-	echo "mount -o rw,remount /system;" >> service.sh
-	echo "makewhatis -Q" >> service.sh
-	echo "mount -o ro,remount /system;" >> service.sh
+termux_step_create_debscripts() {
+	[ "$TERMUX_PACKAGE_FORMAT" != "pacman" ] && echo "interest-noawait $TERMUX_PREFIX/share/man" > triggers
+
+	echo "#!$TERMUX_PREFIX/bin/sh" >> postinst
+	echo "makewhatis -Q" >> postinst
+	echo "exit 0" >> postinst
 }

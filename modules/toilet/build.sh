@@ -1,13 +1,10 @@
-MAGISK_MODULE_HOMEPAGE=http://caca.zoy.org/wiki/toilet
-MAGISK_MODULE_DESCRIPTION="FIGlet-compatible display of large colourful characters in text mode"
-MAGISK_MODULE_LICENSE="WTFPL"
-MAGISK_MODULE_VERSION=0.3
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL=http://fossies.org/linux/privat/toilet-${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=89d4b530c394313cc3f3a4e07a7394fa82a6091f44df44dfcd0ebcb3300a81de
-MAGISK_MODULE_DEPENDS="libcaca,zlib"
-MAGISK_MODULE_BUILD_IN_SRC=yes
-
-magisk_step_pre_configure() {
-	export CACA_LIBS="-lcaca -lz -lncursesw"
-}
+TERMUX_PKG_HOMEPAGE=http://caca.zoy.org/wiki/toilet
+TERMUX_PKG_DESCRIPTION="FIGlet-compatible display of large colourful characters in text mode"
+TERMUX_PKG_LICENSE="WTFPL"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=0.3
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SRCURL=http://deb.debian.org/debian/pool/main/t/toilet/toilet_${TERMUX_PKG_VERSION}.orig.tar.gz
+TERMUX_PKG_SHA256=89d4b530c394313cc3f3a4e07a7394fa82a6091f44df44dfcd0ebcb3300a81de
+TERMUX_PKG_DEPENDS="libcaca"
+TERMUX_PKG_BUILD_IN_SRC=true

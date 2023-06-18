@@ -1,46 +1,47 @@
-MAGISK_MODULE_HOMEPAGE=https://busybox.net/
-MAGISK_MODULE_DESCRIPTION="Tiny versions of many common UNIX utilities into a single small executable"
-MAGISK_MODULE_LICENSE="GPL-2.0"
-MAGISK_MODULE_VERSION=1.32.0
-MAGISK_MODULE_REVISION=2
-MAGISK_MODULE_SRCURL=https://busybox.net/downloads/busybox-${MAGISK_MODULE_VERSION}.tar.bz2
-MAGISK_MODULE_SHA256=c35d87f1d04b2b153d33c275c2632e40d388a88f19a9e71727e0bbbff51fe689
-MAGISK_MODULE_BUILD_IN_SRC=true
+TERMUX_PKG_HOMEPAGE=https://busybox.net/
+TERMUX_PKG_DESCRIPTION="Tiny versions of many common UNIX utilities into a single small executable"
+TERMUX_PKG_LICENSE="GPL-2.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.36.1
+TERMUX_PKG_SRCURL=https://busybox.net/downloads/busybox-${TERMUX_PKG_VERSION}.tar.bz2
+TERMUX_PKG_SHA256=b8cc24c9574d809e7279c3be349795c5d5ceb6fdf19ca709f80cde50e47de314
+TERMUX_PKG_BUILD_IN_SRC=true
 
-MAGISK_MODULE_SERVICE_SCRIPT=(
+TERMUX_PKG_SERVICE_SCRIPT=(
 	"telnetd" 'exec busybox telnetd -F'
-	"ftpd" 'exec busybox tcpsvd -vE 0.0.0.0 8021 busybox ftpd -w $HOME'
+	"ftpd" "exec busybox tcpsvd -vE 0.0.0.0 8021 busybox ftpd -w $TERMUX_ANDROID_HOME"
+	"busybox-httpd" "exec busybox httpd -f -p 0.0.0.0:8080 -h $TERMUX_PREFIX/srv/www/ 2>&1"
 )
 
-mmagisk_step_pre_configure() {
+termux_step_pre_configure() {
 	# Certain packages are not safe to build on device because their
-	# build.sh script deletes specific files in $MAGISK_PREFIX.
-	if $MAGISK_ON_DEVICE_BUILD; then
-		magisk_error_exit "Package '$MAGISK_MODULE_NAME' is not safe for on-device builds."
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
 	fi
 }
 
-magisk_step_configure() {
+termux_step_configure() {
 	# Prevent spamming logs with useless warnings to make them more readable.
 	CFLAGS+=" -Wno-ignored-optimization-argument -Wno-unused-command-line-argument"
 
-	sed -e "s|@MAGISK_PREFIX@|$MAGISK_PREFIX|g" \
-		-e "s|@MAGISK_SYSROOT@|$MAGISK_STANDALONE_TOOLCHAIN/sysroot|g" \
-		-e "s|@MAGISK_HOST_PLATFORM@|${MAGISK_HOST_PLATFORM}|g" \
-		-e "s|@MAGISK_CFLAGS@|$CFLAGS|g" \
-		-e "s|@MAGISK_LDFLAGS@|$LDFLAGS|g" \
-		-e "s|@MAGISK_LDLIBS@|log|g" \
-		$MAGISK_MODULE_BUILDER_DIR/busybox.config > .config
-
+	sed -e "s|@TERMUX_PREFIX@|$TERMUX_PREFIX|g" \
+		-e "s|@TERMUX_SYSROOT@|$TERMUX_STANDALONE_TOOLCHAIN/sysroot|g" \
+		-e "s|@TERMUX_HOST_PLATFORM@|${TERMUX_HOST_PLATFORM}|g" \
+		-e "s|@TERMUX_CFLAGS@|$CFLAGS|g" \
+		-e "s|@TERMUX_LDFLAGS@|$LDFLAGS|g" \
+		-e "s|@TERMUX_LDLIBS@|log|g" \
+		$TERMUX_PKG_BUILDER_DIR/busybox.config > .config
 	unset CFLAGS LDFLAGS
 	make oldconfig
 }
 
-magisk_step_post_make_install() {
-	if $MAGISK_DEBUG; then
-		install -Dm700 busybox_unstripped $PREFIX/bin/busybox
-	fi
+termux_step_make_install() {
+	# Using unstripped variant. The post-massage step will strip binaries anyway.
+	install -Dm700 ./0_lib/busybox_unstripped $TERMUX_PREFIX/bin/busybox
+	install -Dm700 ./0_lib/libbusybox.so.${TERMUX_PKG_VERSION}_unstripped $TERMUX_PREFIX/lib/libbusybox.so.${TERMUX_PKG_VERSION}
+	ln -sfr $TERMUX_PREFIX/lib/libbusybox.so.${TERMUX_PKG_VERSION} $TERMUX_PREFIX/lib/libbusybox.so
 
 	# Install busybox man page.
-	install -Dm600 -t $MAGISK_PREFIX/share/man/man1 $MAGISK_MODULE_SRCDIR/docs/busybox.1
+	install -Dm600 -t $TERMUX_PREFIX/share/man/man1 $TERMUX_PKG_SRCDIR/docs/busybox.1
 }

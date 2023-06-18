@@ -1,16 +1,17 @@
-MAGISK_MODULE_HOMEPAGE=https://gmplib.org/
-MAGISK_MODULE_DESCRIPTION="Library for arbitrary precision arithmetic"
-MAGISK_MODULE_LICENSE="LGPL-3.0"
-MAGISK_MODULE_VERSION=6.2.0
-MAGISK_MODULE_REVISION=4
-MAGISK_MODULE_SRCURL=https://mirrors.kernel.org/gnu/gmp/gmp-${MAGISK_MODULE_VERSION}.tar.xz
-MAGISK_MODULE_SHA256=258e6cd51b3fbdfc185c716d55f82c08aff57df0c6fbd143cf6ed561267a1526
-MAGISK_MODULE_BREAKS="libgmp-dev"
-MAGISK_MODULE_REPLACES="libgmp-dev"
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="--enable-cxx --enable-shared"
+TERMUX_PKG_HOMEPAGE=https://gmplib.org/
+TERMUX_PKG_DESCRIPTION="Library for arbitrary precision arithmetic"
+TERMUX_PKG_LICENSE="LGPL-3.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=6.2.1
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/gmp/gmp-${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=fd4829912cddd12f84181c3451cc752be224643e87fac497b69edddadc49b4f2
+TERMUX_PKG_DEPENDS="libc++"
+TERMUX_PKG_BREAKS="libgmp-dev"
+TERMUX_PKG_REPLACES="libgmp-dev"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--enable-cxx"
 
-mmagisk_step_pre_configure() {
-# the cxx tests fail because it won't link properly without this
-    CXX=$CC
-    CXXFLAGS+=" -L$MAGISK_PREFIX/lib"
+termux_step_pre_configure() {
+	# the cxx tests fail because it won't link properly without this
+	CXXFLAGS+=" -L$TERMUX_PREFIX/lib"
 }

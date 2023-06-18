@@ -1,41 +1,54 @@
-MAGISK_MODULE_HOMEPAGE=https://curl.haxx.se/
-MAGISK_MODULE_DESCRIPTION="Easy-to-use client-side URL transfer library"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_VERSION=7.75.0
-MAGISK_MODULE_SRCURL=https://curl.haxx.se/download/curl-${MAGISK_MODULE_VERSION}.tar.bz2
-MAGISK_MODULE_SHA256=50552d4501c178e4cc68baaecc487f466a3d6d19bbf4e50a01869effb316d026
-MAGISK_MODULE_DEPENDS="openssl, libnghttp2, libdl, c-ares"
-MAGISK_MODULE_BUILD_IN_SRC=true
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
---enable-ntlm-wb=$MAGISK_PREFIX/bin/ntlm_auth
---with-ca-bundle=$MAGISK_PREFIX/etc/tls/cert.pem
---with-ca-path=$MAGISK_PREFIX/etc/tls/certs
+TERMUX_PKG_HOMEPAGE=https://curl.se/
+TERMUX_PKG_DESCRIPTION="Easy-to-use client-side URL transfer library"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION="8.1.0"
+TERMUX_PKG_SRCURL=https://github.com/curl/curl/releases/download/curl-${TERMUX_PKG_VERSION//./_}/curl-${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=6bd80ad4f07187015911216ee7185b90d285ac5162aed1bded144f9f93232a3c
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_UPDATE_VERSION_REGEXP="\d+.\d+.\d+"
+TERMUX_PKG_DEPENDS="libnghttp2, libssh2, openssl (>= 3.0.3), zlib"
+TERMUX_PKG_BREAKS="libcurl-dev"
+TERMUX_PKG_REPLACES="libcurl-dev"
+TERMUX_PKG_ESSENTIAL=true
+
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
+--enable-ntlm-wb=$TERMUX_PREFIX/bin/ntlm_auth
+--with-ca-bundle=$TERMUX_PREFIX/etc/tls/cert.pem
+--with-ca-path=$TERMUX_PREFIX/etc/tls/certs
 --with-nghttp2
---enable-static
---disable-shared
---enable-ares
 --without-libidn
 --without-libidn2
 --without-librtmp
 --without-brotli
 --with-ssl
---with-pic
---with-openssl="/system"
+--with-libssh2
 "
 
-MAGISK_MODULE_INCLUDE_IN_DEVMODULE="bin/curl-config usr/share/man/man1/curl-config.1"
+# https://github.com/termux/termux-packages/issues/15889
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_getpwuid=yes"
 
-magisk_step_configure() {
-	export CFLAGS+=" -static"
-	export CPPFLAGS=" -DCURL_STATICLIB -DCARES_STATICLIB=1"
-	export LDFLAGS=" $LDFLAGS -static"
-	export LIBS=" -lssl -lcrypto -lcares -lz -ldl"
-	#"-lcares -lz -ldl -lssl -lcrypto -lnghttp2 -lz -ldl"
-	#-lssl -lcrypto"
-	./configure --prefix=$MAGISK_PREFIX --enable-cross-compile --with-zlib --host=aarch64-linux-android --target=aarch64-linux-android --disable-ldap --disable-ldaps --enable-versioned-symbols --enable-threaded-resolver $MAGISK_MODULE_EXTRA_CONFIGURE_ARGS
+# Starting with version 7.62 curl started enabling http/2 by default.
+# Support for http/2 as added in version 1.4.8-8 of the apt package, so we
+# conflict with previous versions to avoid broken installations.
+TERMUX_PKG_CONFLICTS="apt (<< 1.4.8-8)"
+
+termux_step_post_get_source() {
+	# Do not forget to bump revision of reverse dependencies and rebuild them
+	# after SOVERSION is changed.
+	local _SOVERSION=4
+
+	local a
+	for a in VERSIONCHANGE VERSIONDEL; do
+		local _${a}=$(sed -En 's/^'"${a}"'=([0-9]+).*/\1/p' \
+				lib/Makefile.soname)
+	done
+	local v=$(( _VERSIONCHANGE - _VERSIONDEL ))
+	if [ ! "${_VERSIONCHANGE}" ] || [ "${v}" != "${_SOVERSION}" ]; then
+		termux_error_exit "SOVERSION guard check failed."
+	fi
 }
 
-magisk_step_make() {
-	make V=2 curl_LDFLAGS=-all-static -j$(nproc) 
-	#LIBS=" -ldl -lz -lnghttp2 -lssl -lcrypto -ldl -lcares -lz"
+termux_step_pre_configure() {
+	LDFLAGS+=" -Wl,-z,nodelete"
 }

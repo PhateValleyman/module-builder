@@ -1,14 +1,14 @@
-MAGISK_MODULE_HOMEPAGE=http://www.linuxfromscratch.org/blfs/view/svn/general/popt.html
-MAGISK_MODULE_DESCRIPTION="Library for parsing cmdline parameters"
-MAGISK_MODULE_LICENSE="BSD"
-MAGISK_MODULE_VERSION=1.18
-MAGISK_MODULE_REVISION=3
-MAGISK_MODULE_SRCURL=https://fossies.org/linux/misc/popt-${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=5159bc03a20b28ce363aa96765f37df99ea4d8850b1ece17d1e6ad5c24fdc5d1
-MAGISK_MODULE_DEPENDS="libandroid-glob"
-MAGISK_MODULE_BREAKS="libpopt-dev"
-MAGISK_MODULE_REPLACES="libpopt-dev"
+TERMUX_PKG_HOMEPAGE=https://www.linuxfromscratch.org/blfs/view/svn/general/popt.html
+TERMUX_PKG_DESCRIPTION="Library for parsing cmdline parameters"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.19
+TERMUX_PKG_SRCURL=http://ftp.rpm.org/popt/releases/popt-1.x/popt-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=c25a4838fc8e4c1c8aacb8bd620edb3084a3d63bf8987fdad3ca2758c63240f9
+TERMUX_PKG_DEPENDS="libandroid-glob"
+TERMUX_PKG_BREAKS="libpopt-dev"
+TERMUX_PKG_REPLACES="libpopt-dev"
 
-magisk_step_pre_configure() {
+termux_step_pre_configure() {
 	LDFLAGS+=" -landroid-glob"
 }

@@ -1,13 +1,8 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/apple/swift-corelibs-libdispatch
-MAGISK_MODULE_DESCRIPTION="The libdispatch project, for concurrency on multicore hardware"
-MAGISK_MODULE_LICENSE="Apache-2.0"
-MAGISK_MODULE_MAINTAINER="@buttaface"
-_VERSION=5.3.3
-MAGISK_MODULE_VERSION=1:${_VERSION}
-MAGISK_MODULE_SRCURL=https://github.com/apple/swift-corelibs-libdispatch/archive/swift-${_VERSION}-RELEASE.tar.gz
-MAGISK_MODULE_SHA256=84a482afefdcda26c7dc83e3b75e662ed7705786a34a6b4958c0cdc6cace2c46
-MAGISK_MODULE_DEPENDS="libc++, libblocksruntime"
-
-magisk_module_pre_configure() {
-	export LDFLAGS+=" -static"
-}
+TERMUX_PKG_HOMEPAGE=https://github.com/apple/swift-corelibs-libdispatch
+TERMUX_PKG_DESCRIPTION="The libdispatch project, for concurrency on multicore hardware"
+TERMUX_PKG_LICENSE="Apache-2.0"
+TERMUX_PKG_MAINTAINER="@finagolfin"
+TERMUX_PKG_VERSION="1:5.8"
+TERMUX_PKG_SRCURL=https://github.com/apple/swift-corelibs-libdispatch/archive/swift-${TERMUX_PKG_VERSION:2}-RELEASE.tar.gz
+TERMUX_PKG_SHA256=391d2bcaea22c4aa980400c3a29b3d9991641aa62253b693c0b79c302eafd5a0
+TERMUX_PKG_DEPENDS="libc++, libblocksruntime"

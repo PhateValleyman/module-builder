@@ -1,62 +1,35 @@
-MAGISK_MODULE_HOMEPAGE=https://sourceware.org/elfutils/
-MAGISK_MODULE_DESCRIPTION="ELF object file access library"
-MAGISK_MODULE_LICENSE="GPL-2.0"
-MAGISK_MODULE_MAINTAINER="@termux"
-# NOTE: We only build the libelf part of elfutils for now,
-# as other parts are not clang compatible.
-MAGISK_MODULE_VERSION=0.182
-MAGISK_MODULE_SRCURL=ftp://sourceware.org/pub/elfutils/${MAGISK_MODULE_VERSION}/elfutils-${MAGISK_MODULE_VERSION}.tar.bz2
-MAGISK_MODULE_SHA256=ecc406914edf335f0b7fc084ebe6c460c4d6d5175bfdd6688c1c78d9146b8858
+TERMUX_PKG_HOMEPAGE=https://sourceware.org/elfutils/
+TERMUX_PKG_DESCRIPTION="ELF object file access library"
+TERMUX_PKG_LICENSE="GPL-2.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=0.189
+TERMUX_PKG_SRCURL="https://sourceware.org/elfutils/ftp/${TERMUX_PKG_VERSION}/elfutils-${TERMUX_PKG_VERSION}.tar.bz2"
+TERMUX_PKG_SHA256=39bd8f1a338e2b7cd4abc3ff11a0eddc6e690f69578a57478d8179b4148708c8
 # libandroid-support for langinfo.
-MAGISK_MODULE_DEPENDS="libandroid-support, zlib, libcurl"
-MAGISK_MODULE_BUILD_DEPENDS="argp"
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="ac_cv_c99=yes --enable-static --disable-symbol-versioning --disable-debuginfod"
-MAGISK_MODULE_CONFLICTS="elfutils, libelf-dev"
-MAGISK_MODULE_REPLACES="elfutils, libelf-dev"
+TERMUX_PKG_DEPENDS="libandroid-support, zlib, zstd"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="ac_cv_c99=yes --disable-symbol-versioning"
+TERMUX_PKG_CONFLICTS="libelf-dev"
+TERMUX_PKG_REPLACES="libelf-dev"
+TERMUX_PKG_BUILD_IN_SRC=true
 
-magisk_step_pre_configure() {
-
-	LDFLAGS+=" -landroid-glob -landroid-support -lz -static"
+termux_step_pre_configure() {
+	CXXFLAGS+=" -Wno-unused-const-variable"
 	CFLAGS+=" -Wno-error=unused-value -Wno-error=format-nonliteral -Wno-error"
 
-	# Exposes ACCESSPERMS in <sys/stat.h> which elfutils uses:
+	# Exposes ACCESSPERMS in <sys/stat.h> which elfutils uses
 	CFLAGS+=" -D__USE_BSD"
 
 	CFLAGS+=" -DFNM_EXTMATCH=0"
 
-	if [ "$MAGISK_ARCH" = "arm" ]; then
+	if [ "$TERMUX_ARCH" = "arm" ]; then
 		CFLAGS="${CFLAGS/-Oz/-O1}"
 	fi
 
-	cp $MAGISK_MODULE_BUILDER_DIR/error.h .
-	cp $MAGISK_MODULE_BUILDER_DIR/stdio_ext.h .
-	cp $MAGISK_MODULE_BUILDER_DIR/obstack.h .
-	cp $MAGISK_MODULE_BUILDER_DIR/qsort_r.h .
-	cp $MAGISK_MODULE_BUILDER_DIR/aligned_alloc.c libelf
+	cp $TERMUX_PKG_BUILDER_DIR/stdio_ext.h .
+	cp $TERMUX_PKG_BUILDER_DIR/obstack.h .
+	cp $TERMUX_PKG_BUILDER_DIR/qsort_r.h .
+	cp $TERMUX_PKG_BUILDER_DIR/aligned_alloc.c libelf
+	cp -r $TERMUX_PKG_BUILDER_DIR/search src/
 
-	autoreconf -if
+	autoreconf -ivf
 }
-
-magisk_step_make() {
-	make -j $MAGISK_MAKE_PROCESSES -C lib
-	make -j $MAGISK_MAKE_PROCESSES -C libelf
-	make -j $MAGISK_MAKE_PROCESSES -C libdwfl
-	make -j $MAGISK_MAKE_PROCESSES -C libebl
-	make -j $MAGISK_MAKE_PROCESSES -C backends
-	make -j $MAGISK_MAKE_PROCESSES -C libcpu
-	make -j $MAGISK_MAKE_PROCESSES -C libdwelf
-	make -j $MAGISK_MAKE_PROCESSES -C libdw
-}
-
-magisk_step_make_install() {
-	make -j $MAGISK_MAKE_PROCESSES -C libelf install
-	make -j $MAGISK_MAKE_PROCESSES -C libdwelf install
-	make -j $MAGISK_MAKE_PROCESSES -C backends install
-	make -j $MAGISK_MAKE_PROCESSES -C libcpu install
-	make -j $MAGISK_MAKE_PROCESSES -C libdwfl install
-	make -j $MAGISK_MAKE_PROCESSES -C libdw install
-	make -j $MAGISK_MAKE_PROCESSES -C libasm install
-	make install-pkgincludeHEADERS
-	make -C config install
-}
-

@@ -1,27 +1,42 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/open-source-parsers/jsoncpp
-MAGISK_MODULE_DESCRIPTION="C++ library for interacting with JSON"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_VERSION=1.9.4
-MAGISK_MODULE_SRCURL=https://github.com/open-source-parsers/jsoncpp/archive/${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=e34a628a8142643b976c7233ef381457efad79468c67cb1ae0b83a33d7493999
-MAGISK_MODULE_DEPENDS="libc++"
-MAGISK_MODULE_BREAKS="jsoncpp-dev"
-MAGISK_MODULE_REPLACES="jsoncpp-dev"
+TERMUX_PKG_HOMEPAGE=https://github.com/open-source-parsers/jsoncpp
+TERMUX_PKG_DESCRIPTION="C++ library for interacting with JSON"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.9.5
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=https://github.com/open-source-parsers/jsoncpp/archive/${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=f409856e5920c18d0c2fb85276e24ee607d2a09b5e7d5f0a371368903c275da2
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_DEPENDS="libc++"
+TERMUX_PKG_BREAKS="jsoncpp-dev"
+TERMUX_PKG_REPLACES="jsoncpp-dev"
 
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
--DBUILD_SHARED_LIBS=OFF
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
+-DBUILD_SHARED_LIBS=ON
 -DJSONCPP_WITH_TESTS=OFF
 -DCCACHE_FOUND=OFF
 "
 
-mmagisk_step_pre_configure() {
+termux_step_post_get_source() {
+	# Do not forget to bump revision of reverse dependencies and rebuild them
+	# after SOVERSION is changed.
+	local _SOVERSION=25
+
+	local v=$(sed -En 's/^set\(PROJECT_SOVERSION\s+([0-9]+).*/\1/p' \
+			CMakeLists.txt)
+	if [ "${v}" != "${_SOVERSION}" ]; then
+		termux_error_exit "SOVERSION guard check failed."
+	fi
+}
+
+termux_step_pre_configure() {
 	# Certain packages are not safe to build on device because their
-	# build.sh script deletes specific files in $MAGISK_PREFIX.
-	#if $MAGISK_ON_DEVICE_BUILD; then
-	#	magisk_error_exit "Package '$MAGISK_MODULE_NAME' is not safe for on-device builds."
-	#fi
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
+	fi
 
 	# The installation does not overwrite symlinks such as libjsoncpp.so.1,
 	# so if rebuilding these are not detected as modified. Fix that:
-	rm -f $MAGISK_PREFIX/lib/libjsoncpp.so*
+	rm -f $TERMUX_PREFIX/lib/libjsoncpp.so*
 }

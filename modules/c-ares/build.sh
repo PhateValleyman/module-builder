@@ -1,26 +1,27 @@
-MAGISK_MODULE_HOMEPAGE=https://c-ares.haxx.se
-MAGISK_MODULE_DESCRIPTION="Library for asynchronous DNS requests (including name resolves)"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_MAINTAINER="@termux"
-MAGISK_MODULE_VERSION=1.17.1
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL=https://github.com/c-ares/c-ares/archive/cares-${MAGISK_MODULE_VERSION//./_}.tar.gz
-MAGISK_MODULE_SHA256=61f7cf09605f5e38d4828f82d0e2ddb9de8e355ecfd6819b740691c644583b8f
-MAGISK_MODULE_BREAKS="c-ares-dev"
-MAGISK_MODULE_REPLACES="c-ares-dev"
+TERMUX_PKG_HOMEPAGE=https://c-ares.haxx.se
+TERMUX_PKG_DESCRIPTION="Library for asynchronous DNS requests (including name resolves)"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.19.0
+TERMUX_PKG_SRCURL=https://github.com/c-ares/c-ares/archive/cares-${TERMUX_PKG_VERSION//./_}.tar.gz
+TERMUX_PKG_SHA256=948016368481b6c5063b849b6dec2a7fd659eee2174b7f3db22ff1b22055ed2a
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_UPDATE_VERSION_REGEXP="\d+.\d+.\d+"
+TERMUX_PKG_DEPENDS="resolv-conf"
+TERMUX_PKG_BREAKS="c-ares-dev"
+TERMUX_PKG_REPLACES="c-ares-dev"
 # Build with cmake to install cmake/c-ares/*.cmake files:
-MAGISK_MODULE_BUILD_IN_SRC=true
-#MAGISK_MODULE_FORCE_CMAKE=true
-#MAGISK_MODULE_RM_AFTER_INSTALL="bin/"
+TERMUX_PKG_FORCE_CMAKE=true
+TERMUX_PKG_RM_AFTER_INSTALL="bin/"
 
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
---disable-shared
-"
+termux_step_post_get_source() {
+	# Do not forget to bump revision of reverse dependencies and rebuild them
+	# after SOVERSION is changed.
+	local _SOVERSION=2
 
-magisk_step_pre_configure() {
-	autoreconf -fi
-	export CFLAGS+=" -static"
-	export CPPFLAGS+=" -DANDROID -D_ANDROID -DCARES_STATIC=true"
-	export LDFLAGS+=" $LDFLAGS -static"
-	#export LIBS=" -lssl -lcrypto -ldl"
+	local e=$(sed -En 's/^\s*SET\s*\(CARES_LIB_VERSIONINFO\s+"?([0-9]+):([0-9]+):([0-9]+).*/\1-\3/p' \
+			CMakeLists.txt)
+	if [ ! "${e}" ] || [ "${_SOVERSION}" != "$(( "${e}" ))" ]; then
+		termux_error_exit "SOVERSION guard check failed."
+	fi
 }

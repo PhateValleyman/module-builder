@@ -1,24 +1,18 @@
-MAGISK_MODULE_HOMEPAGE=http://www.info-zip.org/
-MAGISK_MODULE_DESCRIPTION="Tools for working with zip files"
-MAGISK_MODULE_LICENSE="BSD"
-MAGISK_MODULE_VERSION=3.0
-MAGISK_MODULE_REVISION=2
-MAGISK_MODULE_SRCURL=https://downloads.sourceforge.net/infozip/zip${MAGISK_MODULE_VERSION//./}.tar.gz
-MAGISK_MODULE_SHA256=f0e8bb1f9b7eb0b01285495a2699df3a4b766784c1765a8f1aeedf63c0806369
-MAGISK_MODULE_DEPENDS="libandroid-support, libbz2"
-MAGISK_MODULE_BUILD_IN_SRC=yes
+TERMUX_PKG_HOMEPAGE=https://sourceforge.net/projects/infozip/
+TERMUX_PKG_DESCRIPTION="Tools for working with zip files"
+TERMUX_PKG_LICENSE="BSD"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=3.0
+TERMUX_PKG_REVISION=5
+TERMUX_PKG_SRCURL=https://downloads.sourceforge.net/infozip/zip30.tar.gz
+TERMUX_PKG_SHA256=f0e8bb1f9b7eb0b01285495a2699df3a4b766784c1765a8f1aeedf63c0806369
+TERMUX_PKG_DEPENDS="libandroid-support, libbz2"
+TERMUX_PKG_BUILD_IN_SRC=true
 
-magisk_step_make() {
-	cp $MAGISK_PREFIX/lib/libbz2.a $MAGISK_MODULE_SRCDIR/bzip2/libbz2.a
-	cp $MAGISK_PREFIX/include/bzlib.h $MAGISK_MODULE_SRCDIR/bzip2/bzlib.h
+termux_step_configure() {
+	cp unix/Makefile Makefile
+}
 
-        make -f unix/Makefile clean
-	make -f unix/Makefile generic -j $(nproc) CC=$CC #LD=$LD
-     	mkdir -p $MAGISK_MODULE_MASSAGEDIR/$MAGISK_PREFIX/bin
-     	mkdir -p $MAGISK_MODULE_MASSAGEDIR/$MAGISK_PREFIX/usr/share/man/man1
-	cp $MAGISK_MODULE_SRCDIR/zip $MAGISK_MODULE_MASSAGEDIR/$MAGISK_PREFIX/bin/zip
-	cp $MAGISK_MODULE_SRCDIR/zipcloak $MAGISK_MODULE_MASSAGEDIR/$MAGISK_PREFIX/bin/zipcloak
-	cp $MAGISK_MODULE_SRCDIR/zipnote $MAGISK_MODULE_MASSAGEDIR/$MAGISK_PREFIX/bin/zipnote
-	cp $MAGISK_MODULE_SRCDIR/zipsplit $MAGISK_MODULE_MASSAGEDIR/$MAGISK_PREFIX/bin/zipsplit
-	cp $MAGISK_MODULE_SRCDIR/man/* $MAGISK_MODULE_MASSAGEDIR/$MAGISK_PREFIX/usr/share/man/man1
+termux_step_make() {
+	LD="$CC $LDFLAGS" CC="$CC $CFLAGS $CPPFLAGS $LDFLAGS" make -j $TERMUX_MAKE_PROCESSES generic
 }

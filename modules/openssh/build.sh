@@ -1,15 +1,14 @@
-MAGISK_MODULE_HOMEPAGE=https://www.openssh.com/
-MAGISK_MODULE_DESCRIPTION="Secure shell for logging into a remote machine"
-MAGISK_MODULE_LICENSE="BSD"
-MAGISK_MODULE_MAINTAINER="@termux"
-MAGISK_MODULE_VERSION=8.4p1
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL=https://fastly.cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=5a01d22e407eb1c05ba8a8f7c654d388a13e9f226e4ed33bd38748dafa1d2b24
-MAGISK_MODULE_DEPENDS="libandroid-support, ldns, openssl, libedit, termux-auth, krb5, zlib"
-MAGISK_MODULE_CONFLICTS="dropbear"
+TERMUX_PKG_HOMEPAGE=https://www.openssh.com/
+TERMUX_PKG_DESCRIPTION="Secure shell for logging into a remote machine"
+TERMUX_PKG_LICENSE="BSD"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=9.3p1
+TERMUX_PKG_SRCURL=https://fastly.cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=e9baba7701a76a51f3d85a62c383a3c9dcd97fa900b859bc7db114c1868af8a8
+TERMUX_PKG_DEPENDS="krb5, ldns, libandroid-support, libedit, openssh-sftp-server, openssl, termux-auth, zlib"
+TERMUX_PKG_CONFLICTS="dropbear"
 # --disable-strip to prevent host "install" command to use "-s", which won't work for target binaries:
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --disable-etc-default-login
 --disable-lastlog
 --disable-libutil
@@ -20,96 +19,95 @@ MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
 --disable-utmpx
 --disable-wtmp
 --disable-wtmpx
---sysconfdir=$MAGISK_PREFIX/etc/ssh
+--sysconfdir=$TERMUX_PREFIX/etc/ssh
 --with-cflags=-Dfd_mask=int
 --with-ldns
 --with-libedit
 --with-mantype=man
 --without-ssh1
 --without-stackprotect
---with-pid-dir=$MAGISK_PREFIX/var/run
---with-privsep-path=$MAGISK_PREFIX/var/empty
---with-xauth=$MAGISK_PREFIX/bin/xauth
---without-kerberos5
+--with-pid-dir=$TERMUX_PREFIX/var/run
+--with-privsep-path=$TERMUX_PREFIX/var/empty
+--with-xauth=$TERMUX_PREFIX/bin/xauth
+--with-kerberos5
 ac_cv_func_endgrent=yes
 ac_cv_func_fmt_scaled=no
 ac_cv_func_getlastlogxbyname=no
 ac_cv_func_readpassphrase=no
 ac_cv_func_strnvis=no
 ac_cv_header_sys_un_h=yes
+ac_cv_lib_crypt_crypt=no
 ac_cv_search_getrrsetbyname=no
 ac_cv_func_bzero=yes
 "
-MAGISK_MODULE_MAKE_INSTALL_TARGET="install-nokeys"
-MAGISK_MODULE_RM_AFTER_INSTALL="bin/slogin share/man/man1/slogin.1"
-MAGISK_MODULE_CONFFILES="etc/ssh/ssh_config etc/ssh/sshd_config"
-MAGISK_MODULE_SERVICE_SCRIPT=("sshd" 'exec sshd -D -e 2>&1')
+# Configure script require this variable to set
+# prefixed path to program 'passwd'
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+="PATH_PASSWD_PROG=${TERMUX_PREFIX}/bin/passwd"
 
-magisk_step_pre_configure() {
+TERMUX_PKG_MAKE_INSTALL_TARGET="install-nokeys"
+TERMUX_PKG_RM_AFTER_INSTALL="bin/slogin share/man/man1/slogin.1"
+TERMUX_PKG_CONFFILES="etc/ssh/ssh_config etc/ssh/sshd_config"
+TERMUX_PKG_SERVICE_SCRIPT=("sshd" 'exec sshd -D -e 2>&1')
+
+termux_step_pre_configure() {
 	# Certain packages are not safe to build on device because their
-	# build.sh script deletes specific files in $MAGISK_PREFIX.
-	#if $MAGISK_ON_DEVICE_BUILD; then
-	#	magisk_error_exit "Package '$MAGISK_MODULE_NAME' is not safe for on-device builds."
-	#fi
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
+	fi
 
 	autoreconf
 
-    	## Configure script require this variable to set
-    	## prefixed path to program 'passwd'
-    	export PATH_PASSWD_PROG="${MAGISK_PREFIX}/bin/passwd"
-
 	CPPFLAGS+=" -DHAVE_ATTRIBUTE__SENTINEL__=1 -DBROKEN_SETRESGID"
-	#LDFLAGS+=" -lssl -lcrypto -lldns -static" # liblog for android logging in syslog hack
 	LD=$CC # Needed to link the binaries
 }
 
-magisk_step_post_configure() {
+termux_step_post_configure() {
 	# We need to remove this file before installing, since otherwise the
 	# install leaves it alone which means no updated timestamps.
-	rm -Rf $MAGISK_PREFIX/etc/moduli
+	rm -Rf $TERMUX_PREFIX/etc/moduli
 }
 
-magisk_step_post_make_install() {
-	echo -e "PrintMotd yes\nPasswordAuthentication yes\nSubsystem sftp $MAGISK_PREFIX/libexec/sftp-server" > $MAGISK_PREFIX/etc/ssh/sshd_config
-	printf "SendEnv LANG\n" > $MAGISK_PREFIX/etc/ssh/ssh_config
-	install -Dm700 $MAGISK_MODULE_BUILDER_DIR/source-ssh-agent.sh $MAGISK_PREFIX/bin/source-ssh-agent
-	install -Dm700 $MAGISK_MODULE_BUILDER_DIR/ssh-with-agent.sh $MAGISK_PREFIX/bin/ssha
-	install -Dm700 $MAGISK_MODULE_BUILDER_DIR/sftp-with-agent.sh $MAGISK_PREFIX/bin/sftpa
+termux_step_post_make_install() {
+	echo -e "PrintMotd yes\nPasswordAuthentication yes\nSubsystem sftp $TERMUX_PREFIX/libexec/sftp-server" > $TERMUX_PREFIX/etc/ssh/sshd_config
+	printf "SendEnv LANG\n" > $TERMUX_PREFIX/etc/ssh/ssh_config
+	install -Dm700 $TERMUX_PKG_BUILDER_DIR/source-ssh-agent.sh $TERMUX_PREFIX/bin/source-ssh-agent
+	install -Dm700 $TERMUX_PKG_BUILDER_DIR/ssh-with-agent.sh $TERMUX_PREFIX/bin/ssha
+	install -Dm700 $TERMUX_PKG_BUILDER_DIR/sftp-with-agent.sh $TERMUX_PREFIX/bin/sftpa
+	install -Dm700 $TERMUX_PKG_BUILDER_DIR/scp-with-agent.sh $TERMUX_PREFIX/bin/scpa
 
 	# Install ssh-copy-id:
-	sed -e "s|@MAGISK_PREFIX@|${MAGISK_PREFIX}|g" \
-		$MAGISK_MODULE_BUILDER_DIR/ssh-copy-id.sh \
-		> $MAGISK_PREFIX/bin/ssh-copy-id
-	chmod +x $MAGISK_PREFIX/bin/ssh-copy-id
+	sed -e "s|@TERMUX_PREFIX@|${TERMUX_PREFIX}|g" \
+		$TERMUX_PKG_BUILDER_DIR/ssh-copy-id.sh \
+		> $TERMUX_PREFIX/bin/ssh-copy-id
+	chmod +x $TERMUX_PREFIX/bin/ssh-copy-id
 
-	mkdir -p $MAGISK_PREFIX/var/run
-	echo "OpenSSH needs this folder to put sshd.pid in" >> $MAGISK_PREFIX/var/run/README.openssh
+	mkdir -p $TERMUX_PREFIX/var/run
+	echo "OpenSSH needs this folder to put sshd.pid in" >> $TERMUX_PREFIX/var/run/README.openssh
 
-	mkdir -p $MAGISK_PREFIX/etc/ssh/
-	cp $MAGISK_MODULE_SRCDIR/moduli $MAGISK_PREFIX/etc/ssh/moduli
+	mkdir -p $TERMUX_PREFIX/etc/ssh/
+	cp $TERMUX_PKG_SRCDIR/moduli $TERMUX_PREFIX/etc/ssh/moduli
 }
 
-mmagisk_step_post_massage() {
+termux_step_post_massage() {
 	# Verify that we have man pages packaged (#1538).
 	local manpage
-	tree
-	echo "$(pwd)"
 	for manpage in ssh-keyscan.1 ssh-add.1 scp.1 ssh-agent.1 ssh.1; do
-		if [ ! -f "$(pwd)/$MAGISK_PREFIX/usr/share/man/man1/$manpage.gz" ]; then
-			magisk_error_exit "Missing man page $manpage"
+		if [ ! -f share/man/man1/$manpage.gz ]; then
+			termux_error_exit "Missing man page $manpage"
 		fi
 	done
 }
 
-magisk_step_create_debscripts() {
-	echo "#!$MAGISK_PREFIX/bin/sh" > postinst
+termux_step_create_debscripts() {
+	echo "#!$TERMUX_PREFIX/bin/sh" > postinst
 	echo "mkdir -p \$HOME/.ssh" >> postinst
 	echo "touch \$HOME/.ssh/authorized_keys" >> postinst
 	echo "chmod 700 \$HOME/.ssh" >> postinst
 	echo "chmod 600 \$HOME/.ssh/authorized_keys" >> postinst
 	echo "" >> postinst
 	echo "for a in rsa dsa ecdsa ed25519; do" >> postinst
-	echo "	  KEYFILE=$MAGISK_PREFIX/etc/ssh/ssh_host_\${a}_key" >> postinst
+	echo "	  KEYFILE=$TERMUX_PREFIX/etc/ssh/ssh_host_\${a}_key" >> postinst
 	echo "	  test ! -f \$KEYFILE && ssh-keygen -N '' -t \$a -f \$KEYFILE" >> postinst
 	echo "done" >> postinst
 	echo "exit 0" >> postinst

@@ -1,37 +1,44 @@
-MAGISK_MODULE_HOMEPAGE=https://www.nano-editor.org/
-MAGISK_MODULE_DESCRIPTION="Small, free and friendly text editor"
-MAGISK_MODULE_LICENSE="GPL-2.0"
-MAGISK_MODULE_VERSION=5.8
-MAGISK_MODULE_SHA256=e43b63db2f78336e2aa123e8d015dbabc1720a15361714bfd4b1bb4e5e87768c
-MAGISK_MODULE_SRCURL=https://nano-editor.org/dist/latest/nano-${MAGISK_MODULE_VERSION}.tar.xz
-MAGISK_MODULE_DEPENDS="ncurses,libmagic"
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
+TERMUX_PKG_HOMEPAGE=https://www.nano-editor.org/
+TERMUX_PKG_DESCRIPTION="Small, free and friendly text editor"
+TERMUX_PKG_LICENSE="GPL-3.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=7.2
+TERMUX_PKG_SRCURL=https://nano-editor.org/dist/latest/nano-$TERMUX_PKG_VERSION.tar.xz
+TERMUX_PKG_SHA256=86f3442768bd2873cec693f83cdf80b4b444ad3cc14760b74361474fc87a4526
+TERMUX_PKG_DEPENDS="libandroid-support, ncurses"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
+ac_cv_header_glob_h=no
 ac_cv_header_pwd_h=no
+--disable-libmagic
 --enable-utf8
---enable-libmagic
 --with-wordbounds
---datarootdir=$MAGISK_PREFIX/usr/share
---sysconfdir=$MAGISK_PREFIX/usr/share
 "
-MAGISK_MODULE_CONFFILES="usr/share/nanorc"
-MAGISK_MODULE_RM_AFTER_INSTALL="bin/rnano usr/share/man/man1/rnano.1 usr/share/nano/man-html"
-MAGISK_MODULE_BUILD_IN_SRC=y
+TERMUX_PKG_CONFFILES="etc/nanorc"
+TERMUX_PKG_RM_AFTER_INSTALL="bin/rnano share/man/man1/rnano.1 share/nano/man-html"
 
-magisk_step_pre_configure() {
-	#export PATH=/usr/local/musl/bin:$PATH
-	#export CC=/usr/local/musl/bin/aarch64-linux-musl-gcc
-	MAGISK_MODULE_EXTRA_CONFIGURE_ARGS+=" --host=aarch64-linux-android --target=aarch64-linux-android"
-	LDFLAGS+=" -static -lz -lmagic"
-	if [ "$MAGISK_DEBUG" == "true" ]; then
-		# When doing debug build, -D_FORTIFY_SOURCE=2 gives this error:
-		# /home/builder/.magisk-build/_lib/16-aarch64-21-v3/bin/../sysroot/usr/include/bits/fortify/string.h:79:26: error: use of undeclared identifier '__USE_FORTIFY_LEVEL'
-		export CFLAGS=${CFLAGS/-D_FORTIFY_SOURCE=2/}
-	fi
+termux_step_post_make_install() {
+	# Configure nano to use syntax highlighting:
+	NANORC=$TERMUX_PREFIX/etc/nanorc
+	echo include \"$TERMUX_PREFIX/share/nano/\*nanorc\" > $NANORC
 }
 
-magisk_step_post_make_install() {
-	# Configure nano to use syntax highlighting:
-	rm -Rf $MAGISK_MODULE_MASSAGEDIR/system/usr/share/doc
-	NANORC=$MAGISK_PREFIX/usr/share/nanorc
-	echo include \"$MAGISK_PREFIX/usr/share/nano/\*nanorc\" > $NANORC
+termux_step_create_debscripts() {
+	cat <<- EOF > ./postinst
+	#!$TERMUX_PREFIX/bin/sh
+	if [ "$TERMUX_PACKAGE_FORMAT" = "pacman" ] || [ "\$1" = "configure" ] || [ "\$1" = "abort-upgrade" ]; then
+		if [ -x "$TERMUX_PREFIX/bin/update-alternatives" ]; then
+			update-alternatives --install \
+				$TERMUX_PREFIX/bin/editor editor $TERMUX_PREFIX/bin/nano 20
+		fi
+	fi
+	EOF
+
+	cat <<- EOF > ./prerm
+	#!$TERMUX_PREFIX/bin/sh
+	if [ "$TERMUX_PACKAGE_FORMAT" = "pacman" ] || [ "\$1" != "upgrade" ]; then
+		if [ -x "$TERMUX_PREFIX/bin/update-alternatives" ]; then
+			update-alternatives --remove editor $TERMUX_PREFIX/bin/nano
+		fi
+	fi
+	EOF
 }

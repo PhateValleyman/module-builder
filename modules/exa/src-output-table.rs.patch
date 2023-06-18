@@ -1,34 +1,14 @@
---- exa-058b4a57bdb1e25cbdacc0fbd1eefc09bc5f1e95/src/output/table.rs	2018-12-07 00:59:05.000000000 +0000
-+++ ./src/output/table.rs	2020-09-05 18:49:29.455897127 +0000
-@@ -1,4 +1,5 @@
- use std::cmp::max;
-+use std::env;
- use std::fmt;
- use std::ops::Deref;
- use std::sync::{Mutex, MutexGuard};
-@@ -246,6 +247,9 @@
+diff -u -r ../exa-39c8c67bf6237076b24915851f908d6da13c04b7/src/output/table.rs ./src/output/table.rs
+--- ../exa-39c8c67bf6237076b24915851f908d6da13c04b7/src/output/table.rs	2021-01-06 16:42:09.000000000 +0800
++++ ./src/output/table.rs	2021-01-06 16:46:14.000000000 +0800
+@@ -271,6 +271,10 @@
      }
  
-     pub fn load_all() -> Self {
+     fn load_all() -> Self {
 +        #[cfg(target_os = "android")]
-+        let tz = TimeZone::parse("Europe/Stockholm");
++        let tz = None;
++
 +        #[cfg(not(target_os = "android"))]
          let tz = match determine_time_zone() {
-             Ok(t) => Some(t),
-             Err(ref e) => {
-@@ -264,7 +268,14 @@
- }
- 
- fn determine_time_zone() -> TZResult<TimeZone> {
--    TimeZone::from_file("/etc/localtime")
-+
-+        ///TimeZone::parse("Europa/Stockholm".as_bytes().to_vec())
-+
-+	if let Ok(file) = env::var("TZ") { 
-+        	TimeZone::from_file(format!("/system/usr/share/zoneinfo/{}", file)) // no ;
-+    	} else {
-+        	TimeZone::from_file("/etc/localtime") // no ; 
-+    	}
- }
- 
- 
+             Ok(t) => {
+                 Some(t)

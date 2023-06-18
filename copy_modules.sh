@@ -18,7 +18,7 @@ else
 fi
 
 # Copy the latest files from the termux package repository to our module folder
-cp -r /home/henrik/dev/projects/termux-packages/packages/$MODULE_NAME/* $DIR_NAME
+cp -r /data/data/com.termux/files/home/github/termux-packages/packages/$MODULE_NAME/* $DIR_NAME
 
 # Rename all subpackages to submodules, and replace all needed to be replaced within files
 for file in $(find "$DIR_NAME" -maxdepth 1 -type f); do

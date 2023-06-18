@@ -1,18 +1,9 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/sharkdp/hexyl
-MAGISK_MODULE_DESCRIPTION="A command-line hex viewer"
-MAGISK_MODULE_LICENSE="Apache-2.0"
-MAGISK_MODULE_VERSION=0.8.0
-MAGISK_MODULE_SRCURL=https://github.com/sharkdp/hexyl/archive/v${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=b2e69b4ca694afd580c7ce22ab83a207174d2bbc9dabbad020fee4a98a1205be
-#MAGISK_MODULE_DEPENDS="less, zlib"
-MAGISK_MODULE_BUILD_IN_SRC=true
-
-mmagisk_step_pre_configure() {
-	CFLAGS="$CFLAGS -I/system/include"
-	LDFLAGS="-lz $LDFLAGS -L/system/lib"
-	# $CPPFLAGS"
-
-	# See https://github.com/nagisa/rust_libloading/issues/54
-	export CC_x86_64_unknown_linux_gnu=gcc
-	export CFLAGS_x86_64_unknown_linux_gnu=""
-}
+TERMUX_PKG_HOMEPAGE=https://github.com/sharkdp/hexyl
+TERMUX_PKG_DESCRIPTION="A command-line hex viewer"
+TERMUX_PKG_LICENSE="Apache-2.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION="0.13.0"
+TERMUX_PKG_SRCURL=https://github.com/sharkdp/hexyl/archive/v$TERMUX_PKG_VERSION.tar.gz
+TERMUX_PKG_SHA256=1b5d2fc49724a7ce76253f328190b9b5e09ba39af7ca1be9aa610c5c7e8c91b9
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_BUILD_IN_SRC=true

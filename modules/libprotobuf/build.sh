@@ -1,19 +1,30 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/google/protobuf
-MAGISK_MODULE_DESCRIPTION="Protocol buffers C++ library"
-MAGISK_MODULE_LICENSE="BSD 3-Clause"
-MAGISK_MODULE_VERSION=2:3.13.0
-MAGISK_MODULE_SRCURL=https://github.com/google/protobuf/archive/v${MAGISK_MODULE_VERSION:2}.tar.gz
-MAGISK_MODULE_SHA256=9b4ee22c250fe31b16f1a24d61467e40780a3fbb9b91c3b65be2a376ed913a1a
-MAGISK_MODULE_DEPENDS="libc++, zlib"
-MAGISK_MODULE_BREAKS="libprotobuf-dev"
-MAGISK_MODULE_REPLACES="libprotobuf-dev"
-MAGISK_MODULE_FORCE_CMAKE=true
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
+TERMUX_PKG_HOMEPAGE=https://github.com/protocolbuffers/protobuf
+TERMUX_PKG_DESCRIPTION="Protocol buffers C++ library"
+# utf8_range is licensed under MIT
+TERMUX_PKG_LICENSE="BSD 3-Clause, MIT"
+TERMUX_PKG_LICENSE_FILE="LICENSE"
+TERMUX_PKG_MAINTAINER="@termux"
+# When bumping version:
+# - update SHA256 checksum for $_PROTOBUF_ZIP in
+#     $TERMUX_SCRIPTDIR/scripts/build/setup/termux_setup_protobuf.sh
+# - ALWAYS bump revision of reverse dependencies and rebuild them.
+TERMUX_PKG_VERSION=2:22.4
+TERMUX_PKG_SRCURL=https://github.com/protocolbuffers/protobuf/archive/v${TERMUX_PKG_VERSION#*:}.tar.gz
+TERMUX_PKG_SHA256=def8683aafc1ebaddbc777da252dfdc8e324a197757e3bfcd8b4de90d4b8cf6a
+TERMUX_PKG_AUTO_UPDATE=false
+TERMUX_PKG_DEPENDS="abseil-cpp, libc++, zlib"
+TERMUX_PKG_BREAKS="libprotobuf-dev, protobuf-static (<< ${TERMUX_PKG_VERSION#*:})"
+TERMUX_PKG_REPLACES="libprotobuf-dev"
+TERMUX_PKG_FORCE_CMAKE=true
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
+-Dprotobuf_ABSL_PROVIDER=package
 -Dprotobuf_BUILD_TESTS=OFF
--DBUILD_SHARED_LIBS=OFF
+-DBUILD_SHARED_LIBS=ON
+-DCMAKE_INSTALL_LIBDIR=lib
 "
+TERMUX_PKG_NO_STATICSPLIT=true
 
-magisk_step_pre_configure() {
-	export LDFLAGS="$LDFLAGS -lz -ldl -static"
-	MAGISK_MODULE_SRCDIR+="/cmake/"
+termux_step_post_make_install() {
+	install -Dm600 -t $TERMUX_PREFIX/share/doc/libutf8-range \
+		$TERMUX_PKG_SRCDIR/third_party/utf8_range/LICENSE
 }

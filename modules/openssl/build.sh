@@ -1,69 +1,60 @@
-MAGISK_MODULE_HOMEPAGE=https://www.openssl.org/
-MAGISK_MODULE_DESCRIPTION="Library implementing the SSL and TLS protocols as well as general purpose cryptography functions"
-MAGISK_MODULE_LICENSE="BSD"
-MAGISK_MODULE_VERSION=1.1.1i
-MAGISK_MODULE_SRCURL=https://www.openssl.org/source/openssl-${MAGISK_MODULE_VERSION/\~/-}.tar.gz
-MAGISK_MODULE_SHA256=e8be6a35fe41d10603c3cc635e93289ed00bf34b79671a3a4de64fcee00d5242
-MAGISK_MODULE_DEPENDS="libandroid-support, ca-certificates, zlib"
-MAGISK_MODULE_CONFFILES="etc/tls/openssl.cnf"
-MAGISK_MODULE_BUILD_IN_SRC=true
-MAGISK_MODULE_CONFLICTS="libcurl (<< 7.61.0-1)"
-MAGISK_MODULE_BREAKS="openssl-tool (<< 1.1.1b-1), openssl-dev"
-MAGISK_MODULE_REPLACES="openssl-tool (<< 1.1.1b-1), openssl-dev"
+TERMUX_PKG_HOMEPAGE=https://www.openssl.org/
+TERMUX_PKG_DESCRIPTION="Library implementing the SSL and TLS protocols as well as general purpose cryptography functions"
+TERMUX_PKG_LICENSE="Apache-2.0"
+TERMUX_PKG_MAINTAINER="@termux"
+_VERSION=3.1.0
+TERMUX_PKG_VERSION=1:${_VERSION}
+TERMUX_PKG_SRCURL=https://www.openssl.org/source/openssl-${_VERSION/\~/-}.tar.gz
+TERMUX_PKG_SHA256=aaa925ad9828745c4cad9d9efeb273deca820f2cdcf2c3ac7d7c1212b7c497b4
+TERMUX_PKG_DEPENDS="ca-certificates, zlib"
+TERMUX_PKG_CONFFILES="etc/tls/openssl.cnf"
+TERMUX_PKG_RM_AFTER_INSTALL="bin/c_rehash etc/ssl/misc"
+TERMUX_PKG_BUILD_IN_SRC=true
+TERMUX_PKG_CONFLICTS="libcurl (<< 7.61.0-1)"
+TERMUX_PKG_BREAKS="openssl-tool (<< 1.1.1b-1), openssl-dev"
+TERMUX_PKG_REPLACES="openssl-tool (<< 1.1.1b-1), openssl-dev"
 
-magisk_step_configure() {
-	CFLAGS+=" -DNO_SYSLOG -static"
-	LDFLAGS+=" -L/system/lib -static"
-	perl -p -i -e "s@MAGISK_CFLAGS@$CFLAGS@g" Configure
-	rm -Rf $MAGISK_PREFIX/lib/libcrypto.* $MAGISK_PREFIX/lib/libssl.*
-	test $MAGISK_ARCH = "arm" && MAGISK_OPENSSL_PLATFORM="android-arm"
-	test $MAGISK_ARCH = "aarch64" && MAGISK_OPENSSL_PLATFORM="android-arm64"
-	test $MAGISK_ARCH = "i686" && MAGISK_OPENSSL_PLATFORM="android-x86"
-	test $MAGISK_ARCH = "x86_64" && MAGISK_OPENSSL_PLATFORM="android-x86_64"
-	LIBS='-lz -ldl -lpthread' ./Configure $MAGISK_OPENSSL_PLATFORM \
-		--prefix=$MAGISK_PREFIX \
-		--openssldir=$MAGISK_PREFIX/etc/tls \
-		no-shared \
-		zlib \
+termux_step_configure() {
+	# Certain packages are not safe to build on device because their
+	# build.sh script deletes specific files in $TERMUX_PREFIX.
+	if $TERMUX_ON_DEVICE_BUILD; then
+		termux_error_exit "Package '$TERMUX_PKG_NAME' is not safe for on-device builds."
+	fi
+
+	CFLAGS+=" -DNO_SYSLOG"
+
+	perl -p -i -e "s@TERMUX_CFLAGS@$CFLAGS@g" Configure
+	rm -Rf $TERMUX_PREFIX/lib/libcrypto.* $TERMUX_PREFIX/lib/libssl.*
+	test $TERMUX_ARCH = "arm" && TERMUX_OPENSSL_PLATFORM="android-arm"
+	test $TERMUX_ARCH = "aarch64" && TERMUX_OPENSSL_PLATFORM="android-arm64"
+	test $TERMUX_ARCH = "i686" && TERMUX_OPENSSL_PLATFORM="android-x86"
+	test $TERMUX_ARCH = "x86_64" && TERMUX_OPENSSL_PLATFORM="android-x86_64"
+	./Configure $TERMUX_OPENSSL_PLATFORM \
+		--prefix=$TERMUX_PREFIX \
+		--openssldir=$TERMUX_PREFIX/etc/tls \
+		shared \
+		zlib-dynamic \
+		no-ssl \
 		no-hw \
-		no-asm \
 		no-srp \
 		no-tests
 }
 
-magisk_step_make() {
-	make V=1 depend
-	make V=1 -j $MAGISK_MAKE_PROCESSES all
+termux_step_make() {
+	make depend
+	make -j $TERMUX_MAKE_PROCESSES all
 }
 
-magisk_step_make_install() {
+termux_step_make_install() {
 	# "install_sw" instead of "install" to not install man pages:
-	make V=1 -j 1 install_sw MANDIR=$MAGISK_PREFIX/usr/share/man MANSUFFIX=.ssl
+	make -j 1 install_sw MANDIR=$TERMUX_PREFIX/share/man MANSUFFIX=.ssl
 
-	mkdir -p $MAGISK_PREFIX/etc/tls/
+	mkdir -p $TERMUX_PREFIX/etc/tls/
 
-	cp apps/openssl.cnf $MAGISK_PREFIX/etc/tls/openssl.cnf
+	cp apps/openssl.cnf $TERMUX_PREFIX/etc/tls/openssl.cnf
 
-	sed "s|@MAGISK_PREFIX@|$MAGISK_PREFIX|g" \
-		$MAGISK_MODULE_BUILDER_DIR/add-trusted-certificate \
-		> $MAGISK_PREFIX/bin/add-trusted-certificate
-	chmod 700 $MAGISK_PREFIX/bin/add-trusted-certificate
-}
-
-#export PATH=/usr/local/musl/bin:$PATH
-#export PREFIX=/usr/local/musl/bin/aarch64-linux-musl
-#env CC=${PREFIX}-gcc AR=${PREFIX}-ar RANLIB=${PREFIX}-ranlib C_INCLUDE_PATH=/usr/local/musl/aarch64-linux-musl/include
-
-mmagisk_step_pre_configure() {
-	export PATH=/usr/local/musl/bin:$PATH
-        TARGET=aarch64-linux-musl
-	export CC=${TARGET}-gcc
-	export GCC=${TARGET}-gcc
-	export LD=${TARGET}-ld
-	export AR=${TARGET}-ar
-	export RANLIB=${TARGET}-ranlib
-	export CFLAGS=" -z execstack"
-	C_INCLUDE_PATH=/usr/local/musl/aarch64-linux-musl/include
-	export CFLAGS="$C_INCLUDE_PATH $CFLAGS"
-	#./configure --prefix=$MAGISK_PREFIX --static
+	sed "s|@TERMUX_PREFIX@|$TERMUX_PREFIX|g" \
+		$TERMUX_PKG_BUILDER_DIR/add-trusted-certificate \
+		> $TERMUX_PREFIX/bin/add-trusted-certificate
+	chmod 700 $TERMUX_PREFIX/bin/add-trusted-certificate
 }

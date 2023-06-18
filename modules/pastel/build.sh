@@ -1,7 +1,31 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/sharkdp/pastel
-MAGISK_MODULE_DESCRIPTION="Simple, fast and user-friendly alternative to find"
-MAGISK_MODULE_LICENSE="Apache-2.0"
-MAGISK_MODULE_VERSION=0.8.0
-MAGISK_MODULE_SHA256=603dc63d6aa261f159178dffeb389471a845c1a5d62187a275a3d33a66fe9a69
-MAGISK_MODULE_SRCURL=https://github.com/sharkdp/pastel/archive/v${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_BUILD_IN_SRC=yes
+TERMUX_PKG_HOMEPAGE=https://github.com/sharkdp/pastel
+TERMUX_PKG_DESCRIPTION="A command-line tool to generate, analyze, convert and manipulate colors"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_LICENSE_FILE="LICENSE-MIT, LICENSE-APACHE"
+TERMUX_PKG_MAINTAINER="Yaksh Bariya <thunder-coding@termux.dev>"
+TERMUX_PKG_VERSION="0.9.0"
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=https://github.com/sharkdp/pastel/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=473c805de42f6849a4bb14ec103ca007441f355552bdb6ebc80b60dac1f3a95d
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_BUILD_IN_SRC=true
+
+termux_step_pre_configure() {
+	termux_setup_rust
+}
+
+termux_step_make() {
+	SHELL_COMPLETIONS_DIR=$TERMUX_PKG_BUILDDIR/completions cargo build --jobs $TERMUX_MAKE_PROCESSES --target $CARGO_TARGET_NAME --release
+}
+
+termux_step_make_install() {
+	install -Dm755 -t $TERMUX_PREFIX/bin target/${CARGO_TARGET_NAME}/release/pastel
+
+	# Install completions
+	install -Dm600 $TERMUX_PKG_BUILDDIR/completions/_pastel \
+		$TERMUX_PREFIX/share/zsh/site-functions/_pastel
+	install -Dm600 $TERMUX_PKG_BUILDDIR/completions/pastel.bash \
+		$TERMUX_PREFIX/share/bash-completion/completions/pastel.bash
+	install -Dm600 $TERMUX_PKG_BUILDDIR/completions/pastel.fish \
+		$TERMUX_PREFIX/share/fish/vendor_completions.d/pastel.fish
+}

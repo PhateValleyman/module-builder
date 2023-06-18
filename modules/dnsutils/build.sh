@@ -1,14 +1,16 @@
-MAGISK_MODULE_HOMEPAGE=https://www.isc.org/downloads/bind/
-MAGISK_MODULE_DESCRIPTION="Clients provided with BIND"
-MAGISK_MODULE_LICENSE="MPL-2.0"
-MAGISK_MODULE_VERSION=9.16.7
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL="ftp://ftp.isc.org/isc/bind9/${MAGISK_MODULE_VERSION}/bind-${MAGISK_MODULE_VERSION}.tar.gz"
-MAGISK_MODULE_SHA256=9f7d1812ebbd26a699f62b6fa8522d5dec57e4bf43af0042a0d60d39ed8314d1
-MAGISK_MODULE_DEPENDS="openssl, readline, resolv-conf, zlib"
-MAGISK_MODULE_BREAKS="dnsutils-dev"
-MAGISK_MODULE_REPLACES="dnsutils-dev"
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
+TERMUX_PKG_HOMEPAGE=https://www.isc.org/downloads/bind/
+TERMUX_PKG_DESCRIPTION="Clients provided with BIND"
+TERMUX_PKG_LICENSE="MPL-2.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=9.16.37
+TERMUX_PKG_SRCURL="https://ftp.isc.org/isc/bind9/${TERMUX_PKG_VERSION}/bind-${TERMUX_PKG_VERSION}.tar.xz"
+TERMUX_PKG_SHA256=0e4661d522a2fe1f111c1f0685e7d6993d657f81dae24e7a75dbd8db3ef2e2ab
+TERMUX_PKG_DEPENDS="openssl, readline, resolv-conf, zlib, libuv"
+TERMUX_PKG_BREAKS="dnsutils-dev"
+TERMUX_PKG_REPLACES="dnsutils-dev"
+TERMUX_PKG_BUILD_IN_SRC=true
+
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --disable-linux-caps
 --without-python
 --with-ecdsa=no
@@ -17,14 +19,15 @@ MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
 --with-libjson=no
 --with-libtool
 --with-libxml2=no
---with-openssl=$MAGISK_PREFIX
+--with-openssl=$TERMUX_PREFIX
 --with-randomdev=/dev/random
 --with-readline=-lreadline
 --with-eddsa=no
---enable-static
+ax_cv_have_func_attribute_constructor=yes
+ax_cv_have_func_attribute_destructor=yes
 "
 
-magisk_step_pre_configure() {
+termux_step_pre_configure() {
 	export BUILD_AR=ar
 	export BUILD_CC=gcc
 	export BUILD_CFLAGS=
@@ -32,12 +35,11 @@ magisk_step_pre_configure() {
 	export BUILD_LDFLAGS=
 	export BUILD_RANLIB=
 
-	_RESOLV_CONF=$MAGISK_PREFIX/etc/resolv.conf
+	_RESOLV_CONF=$TERMUX_PREFIX/etc/resolv.conf
 	CFLAGS+=" $CPPFLAGS -DRESOLV_CONF=\\\"$_RESOLV_CONF\\\""
-	LDFLAGS+=" -llog"
 }
 
-magisk_step_make() {
+termux_step_make() {
 	make -C lib/isc
 	make -C lib/dns
 	make -C lib/ns
@@ -50,7 +52,7 @@ magisk_step_make() {
 	make -C bin/nsupdate
 }
 
-magisk_step_make_install() {
+termux_step_make_install() {
 	make -C lib/isc install
 	make -C lib/dns install
 	make -C lib/ns install

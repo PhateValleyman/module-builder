@@ -1,13 +1,9 @@
-MAGISK_MODULE_HOMEPAGE=https://dev.yorhel.nl/ncdu
-MAGISK_MODULE_DESCRIPTION="Disk usage analyzer"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_VERSION=1.15.1
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL=https://dev.yorhel.nl/download/ncdu-${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=b02ddc4dbf1db139cc6fbbe2f54a282770380f0ca5c17089855eab52a9ea3fb0
-MAGISK_MODULE_DEPENDS="ncurses, libandroid-support"
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="--with-shell=$MAGISK_PREFIX/bin/bash"
-
-magisk_step_pre_configure() {
-	LDFLAGS+=" -static"
-}
+TERMUX_PKG_HOMEPAGE=https://dev.yorhel.nl/ncdu
+TERMUX_PKG_DESCRIPTION="Disk usage analyzer"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.18
+TERMUX_PKG_SRCURL=https://dev.yorhel.nl/download/ncdu-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=3c37a1a96580c9c5d2cc352dc3c5eef0d909158c05f1cc29db4712544c8b9f95
+TERMUX_PKG_DEPENDS="ncurses, libandroid-support"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--with-shell=$TERMUX_PREFIX/bin/bash"

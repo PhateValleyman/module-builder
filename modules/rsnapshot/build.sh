@@ -1,29 +1,32 @@
-MAGISK_MODULE_HOMEPAGE=https://www.rsnapshot.org/
-MAGISK_MODULE_DESCRIPTION="A remote filesystem snapshot utility"
-MAGISK_MODULE_LICENSE="GPL-2.0"
-MAGISK_MODULE_VERSION=1.4.3
-MAGISK_MODULE_SRCURL=https://github.com/rsnapshot/rsnapshot/archive/$MAGISK_MODULE_VERSION.tar.gz
-MAGISK_MODULE_SHA256=ab5f70f5b5db4f77f0156856bf4fd60eadb22b4dd6883bf4beb6d54b1bd4980d
-MAGISK_MODULE_DEPENDS="coreutils, openssh, perl, rsync"
-MAGISK_MODULE_PLATFORM_INDEPENDENT=true
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
---with-perl=$MAGISK_PREFIX/bin/perl
---with-rsync=$MAGISK_PREFIX/bin/rsync
---with-rm=$MAGISK_PREFIX/bin/rm
---with-ssh=$MAGISK_PREFIX/bin/ssh
---with-du=$MAGISK_PREFIX/bin/du
+TERMUX_PKG_HOMEPAGE=https://www.rsnapshot.org/
+TERMUX_PKG_DESCRIPTION="A remote filesystem snapshot utility"
+TERMUX_PKG_LICENSE="GPL-2.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION="1.4.5"
+TERMUX_PKG_SRCURL=https://github.com/rsnapshot/rsnapshot/archive/$TERMUX_PKG_VERSION.tar.gz
+TERMUX_PKG_SHA256=8ef500e2eaee85a37fb8000f73b3b1325569fcfe940a7e8ea66a8f243cb289a3
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_DEPENDS="coreutils, openssh, perl, rsync"
+TERMUX_PKG_PLATFORM_INDEPENDENT=true
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
+--with-perl=$TERMUX_PREFIX/bin/perl
+--with-rsync=$TERMUX_PREFIX/bin/rsync
+--with-rm=$TERMUX_PREFIX/bin/rm
+--with-ssh=$TERMUX_PREFIX/bin/ssh
+--with-du=$TERMUX_PREFIX/bin/du
 "
 
-MAGISK_MODULE_CONFFILES="etc/rsnapshot.conf"
+TERMUX_PKG_CONFFILES="etc/rsnapshot.conf"
 
-magisk_step_pre_configure() {
+termux_step_pre_configure() {
 	./autogen.sh
 }
 
-magisk_step_post_make_install() {
-	mkdir -p $MAGISK_PREFIX/etc
-	sed -e "s|@MAGISK_BASE_DIR@|/system|g" \
-		-e "s|@MAGISK_PREFIX@|$MAGISK_PREFIX|g" \
-		-e "s|@MAGISK_HOME@|$MAGISK_ANDROID_HOME|g" \
-		$MAGISK_MODULE_BUILDER_DIR/rsnapshot.conf > $MAGISK_PREFIX/etc/rsnapshot.conf
+termux_step_post_make_install() {
+	mkdir -p $TERMUX_PREFIX/etc
+	sed -e "s%\@TERMUX_BASE_DIR\@%${TERMUX_BASE_DIR}%g" \
+		-e "s%\@TERMUX_CACHE_DIR\@%${TERMUX_CACHE_DIR}%g" \
+		-e "s%\@TERMUX_HOME\@%${TERMUX_ANDROID_HOME}%g" \
+		-e "s%\@TERMUX_PREFIX\@%${TERMUX_PREFIX}%g" \
+		$TERMUX_PKG_BUILDER_DIR/rsnapshot.conf > $TERMUX_PREFIX/etc/rsnapshot.conf
 }

@@ -28,6 +28,7 @@
  * SUCH DAMAGE.
  */
 #if 0
+#include <sys/cdefs.h>
 #if defined(LIBC_SCCS) && !defined(lint)
 #if 0
 static char sccsid[] = "@(#)getpass.c	8.1 (Berkeley) 6/4/93";

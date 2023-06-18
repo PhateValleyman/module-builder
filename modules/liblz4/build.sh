@@ -1,19 +1,26 @@
-MAGISK_MODULE_HOMEPAGE=https://lz4.github.io/lz4/
-MAGISK_MODULE_DESCRIPTION="Fast LZ compression algorithm library"
-MAGISK_MODULE_LICENSE="GPL-2.0"
-MAGISK_MODULE_VERSION=1.9.2
-MAGISK_MODULE_SRCURL=https://github.com/lz4/lz4/archive/v${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=658ba6191fa44c92280d4aa2c271b0f4fbc0e34d249578dd05e50e76d0e5efcc
-MAGISK_MODULE_BREAKS="liblz4-dev"
-MAGISK_MODULE_REPLACES="liblz4-dev"
-MAGISK_MODULE_BUILD_IN_SRC=true
+TERMUX_PKG_HOMEPAGE=https://lz4.github.io/lz4/
+TERMUX_PKG_DESCRIPTION="Fast LZ compression algorithm library"
+TERMUX_PKG_LICENSE="GPL-2.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.9.4
+TERMUX_PKG_SRCURL=https://github.com/lz4/lz4/archive/v${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=0b0e3aa07c8c063ddf40b082bdf7e37a1562bda40a0ff5272957f3e987e0e54b
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_BREAKS="liblz4-dev"
+TERMUX_PKG_REPLACES="liblz4-dev"
 
-magisk_step_pre_configure() {
-	MAGISK_MODULE_SRCDIR+=lib
+termux_step_post_get_source() {
+	# Do not forget to bump revision of reverse dependencies and rebuild them
+	# after SOVERSION is changed.
+	local _SOVERSION=1
+
+	local v=$(sed -En 's/^#define LZ4_VERSION_MAJOR +([0-9]+) +.*$/\1/p' \
+			lib/lz4.h)
+	if [ "${_SOVERSION}" != "${v}" ]; then
+		termux_error_exit "SOVERSION guard check failed."
+	fi
 }
 
-# Do not execute this step since on `make install` it will
-# recompile libraries & tools again.
-magisk_step_make() {
-	:
+termux_step_pre_configure() {
+	TERMUX_PKG_SRCDIR+=/build/cmake
 }

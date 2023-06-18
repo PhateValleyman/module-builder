@@ -1,12 +1,16 @@
-MAGISK_MODULE_HOMEPAGE=https://libcxx.llvm.org/
-MAGISK_MODULE_DESCRIPTION="C++ Standard Library"
-MAGISK_MODULE_LICENSE="NCSA"
-MAGISK_MODULE_VERSION=$MAGISK_NDK_VERSION
-MAGISK_MODULE_ESSENTIAL=yes
-MAGISK_PKG_SKIP_SRC_EXTRACT=true
+TERMUX_PKG_HOMEPAGE=https://libcxx.llvm.org/
+TERMUX_PKG_DESCRIPTION="C++ Standard Library"
+TERMUX_PKG_LICENSE="NCSA"
+TERMUX_PKG_MAINTAINER="@termux"
+# Version should be equal to TERMUX_NDK_{VERSION_NUM,REVISION} in
+# scripts/properties.sh
+TERMUX_PKG_VERSION=25c
+TERMUX_PKG_SRCURL=https://dl.google.com/android/repository/android-ndk-r${TERMUX_PKG_VERSION}-linux.zip
+TERMUX_PKG_SHA256=769ee342ea75f80619d985c2da990c48b3d8eaf45f48783a2d48870d04b46108
+TERMUX_PKG_ESSENTIAL=true
+TERMUX_PKG_BUILD_IN_SRC=true
 
-magisk_step_post_make_install() {
-	#ls -la "$MAGISK_STANDALONE_TOOLCHAIN/sysroot/usr/lib/${MAGISK_HOST_PLATFORM}/"
-	#cp "$MAGISK_STANDALONE_TOOLCHAIN/sysroot/usr/lib/${MAGISK_HOST_PLATFORM}/libc++_shared.so" $MAGISK_PREFIX/lib
-	cp "$MAGISK_STANDALONE_TOOLCHAIN/sysroot/usr/lib/${MAGISK_HOST_PLATFORM}/libc++_static.a" $MAGISK_PREFIX/lib
+termux_step_post_make_install() {
+	install -m700 -t "$TERMUX_PREFIX"/lib \
+		toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/"${TERMUX_HOST_PLATFORM}"/libc++_shared.so
 }

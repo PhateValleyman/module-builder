@@ -1,20 +1,11 @@
---- mdns-scan-0.5/Makefile	2018-08-13 20:45:09.000000000 +0000
-+++ ./Makefile	2020-05-27 21:07:43.780616346 +0000
-@@ -5,7 +5,7 @@
- CFLAGS=-Wall -W -g -O0 -pipe
- 
- mdns-scan: mdns-scan.o dns.o query.o util.o
--	$(CC) -o $@ $^
-+	$(CC) -static -o $@ $^
- 
- dist: $(TARFILE)
- 
+--- ./Makefile.orig	2021-05-13 16:32:58.609046941 +0000
++++ ./Makefile	2021-05-13 16:33:08.839042091 +0000
 @@ -18,7 +18,7 @@
  	rm -rf $(DISTDIR)
  
  install:
 -	install mdns-scan $(DESTDIR)/usr/bin/mdns-scan
-+	install mdns-scan $(DESTDIR)/bin/mdns-scan
++	install mdns-scan $(DESTDIR)$(PREFIX)/bin/mdns-scan
  
  clean:
  	rm -f mdns-scan *.o *.tar.gz

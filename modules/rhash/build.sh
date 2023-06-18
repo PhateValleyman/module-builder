@@ -1,26 +1,47 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/rhash/RHash
-MAGISK_MODULE_DESCRIPTION="Console utility for calculation and verification of magnet links and a wide range of hash sums"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_VERSION=1.4.0
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL=https://github.com/rhash/RHash/archive/v$MAGISK_MODULE_VERSION.tar.gz
-MAGISK_MODULE_SHA256=2ea39540f5c580da0e655f7b483c19e0d31506aed4202d88e8459fa7aeeb8861
-MAGISK_MODULE_DEPENDS="openssl"
-MAGISK_MODULE_CONFLICTS="librhash, rhash-dev"
-MAGISK_MODULE_REPLACES="librhash, rhash-dev"
-MAGISK_MODULE_BUILD_IN_SRC=true
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="--disable-static --enable-lib-static --enable-lib-shared"
+TERMUX_PKG_HOMEPAGE=https://github.com/rhash/RHash
+TERMUX_PKG_DESCRIPTION="Console utility for calculation and verification of magnet links and a wide range of hash sums"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.4.3
+TERMUX_PKG_SRCURL=https://github.com/rhash/RHash/archive/v$TERMUX_PKG_VERSION.tar.gz
+TERMUX_PKG_SHA256=1e40fa66966306920f043866cbe8612f4b939b033ba5e2708c3f41be257c8a3e
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_DEPENDS="openssl"
+TERMUX_PKG_CONFLICTS="librhash, rhash-dev"
+TERMUX_PKG_REPLACES="librhash, rhash-dev"
+TERMUX_PKG_BUILD_IN_SRC=true
 
-magisk_step_make() {
-	CFLAGS="-DOPENSSL_RUNTIME $CPPFLAGS $CFLAGS"
-	make -j $MAGISK_MAKE_PROCESSES \
+termux_step_configure() {
+	CFLAGS="-DOPENSSL_RUNTIME -DSYSCONFDIR=\"${TERMUX_PREFIX}/etc\" $CPPFLAGS $CFLAGS"
+	./configure \
+		--prefix=$TERMUX_PREFIX \
+		--disable-static \
+		--enable-lib-static \
+		--enable-lib-shared \
+		--cc=$CC
+}
+
+termux_step_make() {
+	make -j $TERMUX_MAKE_PROCESSES \
 		ADDCFLAGS="$CFLAGS" \
 		ADDLDFLAGS="$LDFLAGS"
 }
 
-magisk_step_make_install() {
+termux_step_make_install() {
 	make install install-pkg-config
 	make -C librhash install-lib-headers
 
-	ln -sf $MAGISK_PREFIX/lib/librhash.so.0 $MAGISK_PREFIX/lib/librhash.so
+	ln -sf $TERMUX_PREFIX/lib/librhash.so.0 $TERMUX_PREFIX/lib/librhash.so
+}
+
+termux_step_post_massage() {
+	# Do not forget to bump revision of reverse dependencies and rebuild them
+	# after SOVERSION is changed.
+	local _SOVERSION_GUARD_FILES="lib/librhash.so.0"
+	local f
+	for f in ${_SOVERSION_GUARD_FILES}; do
+		if [ ! -e "${f}" ]; then
+			termux_error_exit "SOVERSION guard check failed."
+		fi
+	done
 }

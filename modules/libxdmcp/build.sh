@@ -1,11 +1,9 @@
 # X11 package
-MAGISK_MODULE_HOMEPAGE=https://xorg.freedesktop.org/
-MAGISK_MODULE_DESCRIPTION="X11 Display Manager Control Protocol library"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
-MAGISK_MODULE_VERSION=1.1.3
-MAGISK_MODULE_REVISION=8
-MAGISK_MODULE_SRCURL=https://ftp.osuosl.org/pub/blfs/svn/Xorg/libXdmcp-${MAGISK_MODULE_VERSION}.tar.bz2
-#https://xorg.freedesktop.org/archive/individual/lib/libXdmcp-${MAGISK_MODULE_VERSION}.tar.bz2
-MAGISK_MODULE_SHA256=20523b44aaa513e17c009e873ad7bbc301507a3224c232610ce2e099011c6529
-MAGISK_MODULE_BUILD_DEPENDS="xorgproto, xorg-util-macros"
+TERMUX_PKG_HOMEPAGE=https://xorg.freedesktop.org/
+TERMUX_PKG_DESCRIPTION="X11 Display Manager Control Protocol library"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.1.4
+TERMUX_PKG_SRCURL=https://xorg.freedesktop.org/archive/individual/lib/libXdmcp-${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=2dce5cc317f8f0b484ec347d87d81d552cdbebb178bd13c5d8193b6b7cd6ad00
+TERMUX_PKG_BUILD_DEPENDS="xorgproto, xorg-util-macros"

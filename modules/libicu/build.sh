@@ -1,17 +1,23 @@
-MAGISK_MODULE_HOMEPAGE=http://site.icu-project.org/home
-MAGISK_MODULE_DESCRIPTION='International Components for Unicode library'
-MAGISK_MODULE_LICENSE="BSD"
-MAGISK_MODULE_VERSION=67.1
-MAGISK_MODULE_REVISION=2
-MAGISK_MODULE_SRCURL=https://github.com/unicode-org/icu/releases/download/release-${MAGISK_MODULE_VERSION//./-}/icu4c-${MAGISK_MODULE_VERSION//./_}-src.tgz
-MAGISK_MODULE_SHA256=94a80cd6f251a53bd2a997f6f1b5ac6653fe791dfab66e1eb0227740fb86d5dc
-MAGISK_MODULE_DEPENDS="libc++"
-MAGISK_MODULE_BREAKS="libicu-dev"
-MAGISK_MODULE_REPLACES="libicu-dev"
-MAGISK_MODULE_HOSTBUILD=true
-MAGISK_MODULE_EXTRA_HOSTBUILD_CONFIGURE_ARGS="--disable-samples --disable-tests"
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="--disable-samples --disable-tests --with-cross-build=$MAGISK_MODULE_HOSTBUILD_DIR"
+TERMUX_PKG_HOMEPAGE=http://site.icu-project.org/home
+TERMUX_PKG_DESCRIPTION='International Components for Unicode library'
+TERMUX_PKG_LICENSE="BSD"
+# We override TERMUX_PKG_SRCDIR termux_step_post_get_source so need to do
+# this hack to be able to find the license file.
+TERMUX_PKG_LICENSE_FILE="../LICENSE"
+TERMUX_PKG_MAINTAINER="@termux"
+# Never forget to always bump revision of reverse dependencies and rebuild them
+# when bumping version.
+TERMUX_PKG_VERSION=73.1
+TERMUX_PKG_SRCURL=https://github.com/unicode-org/icu/releases/download/release-${TERMUX_PKG_VERSION//./-}/icu4c-${TERMUX_PKG_VERSION//./_}-src.tgz
+TERMUX_PKG_SHA256=a457431de164b4aa7eca00ed134d00dfbf88a77c6986a10ae7774fc076bb8c45
+TERMUX_PKG_DEPENDS="libc++"
+TERMUX_PKG_BREAKS="libicu-dev"
+TERMUX_PKG_REPLACES="libicu-dev"
+TERMUX_PKG_HOSTBUILD=true
+TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS="--disable-samples --disable-tests"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--disable-samples --disable-tests --with-cross-build=$TERMUX_PKG_HOSTBUILD_DIR"
 
-magisk_step_post_extract_module() {
-	MAGISK_MODULE_SRCDIR+="/source"
+termux_step_post_get_source() {
+	TERMUX_PKG_SRCDIR+="/source"
+	find . -type f | xargs touch
 }

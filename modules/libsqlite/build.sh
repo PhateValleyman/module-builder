@@ -1,37 +1,33 @@
-MAGISK_MODULE_HOMEPAGE=https://www.sqlite.org
-MAGISK_MODULE_DESCRIPTION="Library implementing a self-contained and transactional SQL database engine"
-MAGISK_MODULE_LICENSE="Public Domain"
-# Note: Updating this version requires bumping the tcl package as well.
+TERMUX_PKG_HOMEPAGE=https://www.sqlite.org
+TERMUX_PKG_DESCRIPTION="Library implementing a self-contained and transactional SQL database engine"
+TERMUX_PKG_LICENSE="Public Domain"
+TERMUX_PKG_MAINTAINER="@termux"
+# Note: Updating this version requires bumping libsqlite-tcl package as well.
 _SQLITE_MAJOR=3
-_SQLITE_MINOR=33
+_SQLITE_MINOR=42
 _SQLITE_PATCH=0
-MAGISK_MODULE_VERSION=${_SQLITE_MAJOR}.${_SQLITE_MINOR}.${_SQLITE_PATCH}
-MAGISK_MODULE_SRCURL=https://www.sqlite.org/2020/sqlite-autoconf-${_SQLITE_MAJOR}${_SQLITE_MINOR}0${_SQLITE_PATCH}00.tar.gz
-MAGISK_MODULE_SHA256=106a2c48c7f75a298a7557bcc0d5f4f454e5b43811cc738b7ca294d6956bbb15
-MAGISK_MODULE_DEPENDS="zlib"
-MAGISK_MODULE_BREAKS="libsqlite-dev"
-MAGISK_MODULE_REPLACES="libsqlite-dev"
-# ac_cv_func_strerror_r=no as strerror_r() with the
-# GNU signature is only # available in android-23:
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
-ac_cv_func_strerror_r=no
---with-gnu-ld
+_SQLITE_YEAR=2023
+TERMUX_PKG_VERSION=${_SQLITE_MAJOR}.${_SQLITE_MINOR}.${_SQLITE_PATCH}
+TERMUX_PKG_SRCURL=https://www.sqlite.org/${_SQLITE_YEAR}/sqlite-autoconf-${_SQLITE_MAJOR}${_SQLITE_MINOR}0${_SQLITE_PATCH}00.tar.gz
+TERMUX_PKG_SHA256=7abcfd161c6e2742ca5c6c0895d1f853c940f203304a0b49da4e1eca5d088ca6
+TERMUX_PKG_DEPENDS="zlib"
+TERMUX_PKG_BREAKS="libsqlite-dev"
+TERMUX_PKG_REPLACES="libsqlite-dev"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
 --enable-readline
---with-static
---without-shared
---enable-static
---disable-shared
---enable-static-shell=yes
+--enable-fts3
 "
 
-magisk_step_pre_configure() {
-	export CC=/usr/local/musl/bin/aarch64-linux-musl-gcc
-	CPPFLAGS+=" -Werror -DSQLITE_ENABLE_DBSTAT_VTAB=1"
-	#export LDFLAGS="$LDFLAGS -lc -lm -ldl -static"
-	export LIBS=" -lc -lm -ldl"
+termux_step_post_get_source() {
+	# Version guard
+	local ver_s=${TERMUX_PKG_VERSION#*:}
+	local ver_t=$(. $TERMUX_SCRIPTDIR/packages/libsqlite-tcl/build.sh; echo ${TERMUX_PKG_VERSION#*:})
+	if [ "${ver_s}" != "${ver_t}" ]; then
+		termux_error_exit "Version mismatch between libsqlite and libsqlite-tcl."
+	fi
 }
 
-magisk_step_post_make_install() {
-	mkdir -p $MAGISK_PREFIX/src/libsqlite
-	cp $MAGISK_MODULE_SRCDIR/tea/generic/tclsqlite3.c $MAGISK_PREFIX/src/libsqlite/tclsqlite3.c
+termux_step_pre_configure() {
+	CPPFLAGS+=" -Werror -DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_COLUMN_METADATA=1 -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT=1"
+	LDFLAGS+=" -lm"
 }

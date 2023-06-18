@@ -1,27 +1,27 @@
-MAGISK_MODULE_HOMEPAGE="https://tiswww.case.edu/php/chet/readline/rltop.html"
-MAGISK_MODULE_DESCRIPTION="Library that allow users to edit command lines as they are typed in"
-MAGISK_MODULE_LICENSE="GPL-3.0"
-MAGISK_MODULE_DEPENDS="libandroid-support, ncurses"
-MAGISK_MODULE_BREAKS="bash (<< 5.0), readline-dev"
-MAGISK_MODULE_REPLACES="readline-dev"
-_MAIN_VERSION=8.0
-_PATCH_VERSION=4
-MAGISK_MODULE_VERSION=$_MAIN_VERSION.$_PATCH_VERSION
-MAGISK_MODULE_SRCURL=https://mirrors.kernel.org/gnu/readline/readline-${_MAIN_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=e339f51971478d369f8a053a330a190781acb9864cf4c541060f12078948e461
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="--with-curses --enable-multibyte bash_cv_wcwidth_broken=no --enable-shared"
-MAGISK_MODULE_EXTRA_MAKE_ARGS="SHLIB_LIBS=-lncursesw"
-MAGISK_MODULE_CONFFILES="etc/inputrc"
+TERMUX_PKG_HOMEPAGE="https://tiswww.case.edu/php/chet/readline/rltop.html"
+TERMUX_PKG_DESCRIPTION="Library that allow users to edit command lines as they are typed in"
+TERMUX_PKG_LICENSE="GPL-3.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_DEPENDS="libandroid-support, ncurses"
+TERMUX_PKG_BREAKS="bash (<< 5.0), readline-dev"
+TERMUX_PKG_REPLACES="readline-dev"
+_MAIN_VERSION=8.2
+_PATCH_VERSION=1
+TERMUX_PKG_VERSION=$_MAIN_VERSION.$_PATCH_VERSION
+TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/readline/readline-${_MAIN_VERSION}.tar.gz
+TERMUX_PKG_SHA256=3feb7171f16a84ee82ca18a36d7b9be109a52c04f492a053331d7d1095007c35
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="--with-curses --enable-multibyte bash_cv_wcwidth_broken=no"
+TERMUX_PKG_EXTRA_MAKE_ARGS="SHLIB_LIBS=-lncursesw"
+TERMUX_PKG_CONFFILES="etc/inputrc"
 
-magisk_step_pre_configure() {
+termux_step_pre_configure() {
 	declare -A PATCH_CHECKSUMS
-	PATCH_CHECKSUMS[001]=d8e5e98933cf5756f862243c0601cb69d3667bb33f2c7b751fe4e40b2c3fd069
-	PATCH_CHECKSUMS[002]=36b0febff1e560091ae7476026921f31b6d1dd4c918dcb7b741aa2dad1aec8f7
-	PATCH_CHECKSUMS[003]=94ddb2210b71eb5389c7756865d60e343666dfb722c85892f8226b26bb3eeaef
-	PATCH_CHECKSUMS[004]=b1aa3d2a40eee2dea9708229740742e649c32bb8db13535ea78f8ac15377394c
+
+	PATCH_CHECKSUMS[001]=bbf97f1ec40a929edab5aa81998c1e2ef435436c597754916e6a5868f273aff7
+
 	for PATCH_NUM in $(seq -f '%03g' ${_PATCH_VERSION}); do
-		PATCHFILE=$MAGISK_MODULE_CACHEDIR/readline_patch_${PATCH_NUM}.patch
-		magisk_download \
+		PATCHFILE=$TERMUX_PKG_CACHEDIR/readline_patch_${PATCH_NUM}.patch
+		termux_download \
 			"http://mirrors.kernel.org/gnu/readline/readline-$_MAIN_VERSION-patches/readline${_MAIN_VERSION/./}-$PATCH_NUM" \
 			$PATCHFILE \
 			${PATCH_CHECKSUMS[$PATCH_NUM]}
@@ -31,10 +31,10 @@ magisk_step_pre_configure() {
 	CFLAGS+=" -fexceptions"
 }
 
-magisk_step_post_make_install() {
-	mkdir -p $MAGISK_PREFIX/lib/pkgconfig
-	cp readline.pc $MAGISK_PREFIX/lib/pkgconfig/
+termux_step_post_make_install() {
+	mkdir -p $TERMUX_PREFIX/lib/pkgconfig
+	cp readline.pc $TERMUX_PREFIX/lib/pkgconfig/
 
-	mkdir -p $MAGISK_PREFIX/etc
-	cp $MAGISK_MODULE_BUILDER_DIR/inputrc $MAGISK_PREFIX/etc/
+	mkdir -p $TERMUX_PREFIX/etc
+	cp $TERMUX_PKG_BUILDER_DIR/inputrc $TERMUX_PREFIX/etc/
 }

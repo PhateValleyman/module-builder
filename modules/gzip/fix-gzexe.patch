@@ -6,7 +6,7 @@ diff -uNr gzip-1.9/gzexe.in gzip-1.9.mod/gzexe.in
  
    dir=`dirname "$file"` || dir=$TMPDIR
 -  test -d "$dir" && test -w "$dir" && test -x "$dir" || dir=/tmp
-+  test -d "$dir" && test -w "$dir" && test -x "$dir" || dir=@MAGISK_PREFIX@/tmp
++  test -d "$dir" && test -w "$dir" && test -x "$dir" || dir=@TERMUX_PREFIX@/tmp
    test -n "$tmp" && rm -f "$tmp"
    if test -z "$mktemp_status"; then
      type mktemp >/dev/null 2>&1
@@ -15,8 +15,8 @@ diff -uNr gzip-1.9/gzexe.in gzip-1.9.mod/gzexe.in
    if test $decomp -eq 0; then
      (cat <<'EOF' &&
 -#!/bin/sh
--skip=44
-+#!@MAGISK_PREFIX@/bin/sh
+-skip=49
++#!@TERMUX_PREFIX@/bin/sh
 +skip=50
 +set -e
  
@@ -27,7 +27,7 @@ diff -uNr gzip-1.9/gzexe.in gzip-1.9.mod/gzexe.in
    / | /*/) ;;
    /*) TMPDIR=$TMPDIR/;;
 -  *) TMPDIR=/tmp/;;
-+  *) TMPDIR=@MAGISK_PREFIX@/tmp/;;
++  *) TMPDIR=@TERMUX_PREFIX@/tmp/;;
  esac
  if type mktemp >/dev/null 2>&1; then
    gztmpdir=`mktemp -d "${TMPDIR}gztmpXXXXXXXXX"`
@@ -37,6 +37,6 @@ diff -uNr gzip-1.9/gzexe.in gzip-1.9.mod/gzexe.in
      # decompression
 -    skip=44
 +    skip=50
-     skip_line=`sed -e 1d -e 2q "$file"`
+     skip_line=`LC_ALL=C sed -e 1d -e 2q "$file"`
      case $skip_line in
      skip=[0-9] | skip=[0-9][0-9] | skip=[0-9][0-9][0-9])

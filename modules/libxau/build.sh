@@ -1,10 +1,9 @@
 # X11 package
-MAGISK_MODULE_HOMEPAGE=https://xorg.freedesktop.org/
-MAGISK_MODULE_DESCRIPTION="X11 authorisation library"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_MAINTAINER="Leonid Plyushch <leonid.plyushch@gmail.com>"
-MAGISK_MODULE_VERSION=1.0.9
-MAGISK_MODULE_REVISION=7
-MAGISK_MODULE_SRCURL=https://www.x.org/releases/individual/lib/libXau-${MAGISK_MODULE_VERSION}.tar.bz2
-MAGISK_MODULE_SHA256=ccf8cbf0dbf676faa2ea0a6d64bcc3b6746064722b606c8c52917ed00dcb73ec
-MAGISK_MODULE_BUILD_DEPENDS="xorgproto"
+TERMUX_PKG_HOMEPAGE=https://xorg.freedesktop.org/
+TERMUX_PKG_DESCRIPTION="X11 authorisation library"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.0.11
+TERMUX_PKG_SRCURL=https://xorg.freedesktop.org/releases/individual/lib/libXau-${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=f3fa3282f5570c3f6bd620244438dbfbdd580fc80f02f549587a0f8ab329bbeb
+TERMUX_PKG_BUILD_DEPENDS="xorgproto"

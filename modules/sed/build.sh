@@ -1,17 +1,26 @@
-MAGISK_MODULE_HOMEPAGE=https://www.gnu.org/software/sed/
-MAGISK_MODULE_DESCRIPTION="GNU stream editor for filtering/transforming text"
-MAGISK_MODULE_LICENSE="GPL-3.0"
-MAGISK_MODULE_VERSION=4.8
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL=https://mirrors.kernel.org/gnu/sed/sed-4.8.tar.xz
-MAGISK_MODULE_SHA256=f79b0cfea71b37a8eeec8490db6c5f7ae7719c35587f21edb0617f370eeff633
-MAGISK_MODULE_ESSENTIAL=yes
-MAGISK_MODULE_BUILD_IN_SRC=yes
+TERMUX_PKG_HOMEPAGE=https://www.gnu.org/software/sed/
+TERMUX_PKG_DESCRIPTION="GNU stream editor for filtering/transforming text"
+TERMUX_PKG_LICENSE="GPL-3.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=4.9
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/sed/sed-${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=6e226b732e1cd739464ad6862bd1a1aba42d7982922da7a53519631d24975181
+TERMUX_PKG_ESSENTIAL=true
+TERMUX_PKG_BUILD_IN_SRC=true
+TERMUX_PKG_GROUPS="base-devel"
 
-magisk_step_pre_configure() {
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
+ac_cv_func_nl_langinfo=no
+ac_cv_header_langinfo_h=no
+am_cv_langinfo_codeset=no
+gl_cv_func_setlocale_works=yes
+"
+
+termux_step_pre_configure() {
 	CFLAGS+=" -D__USE_FORTIFY_LEVEL=2"
 }
 
-magisk_step_post_configure() {
-	touch -d "next hour" $MAGISK_MODULE_SRCDIR/doc/sed.1
+termux_step_post_configure() {
+	touch -d "next hour" $TERMUX_PKG_SRCDIR/doc/sed.1
 }

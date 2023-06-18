@@ -1,47 +1,28 @@
-MAGISK_MODULE_HOMEPAGE=https://www.nlnetlabs.nl/projects/ldns/
-MAGISK_MODULE_DESCRIPTION="Library for simplifying DNS programming and supporting recent and experimental RFCs"
-MAGISK_MODULE_LICENSE="BSD 3-Clause"
-MAGISK_MODULE_MAINTAINER="@termux"
-MAGISK_MODULE_VERSION=1.7.1
-MAGISK_MODULE_REVISION=3
-MAGISK_MODULE_SRCURL=https://www.nlnetlabs.nl/downloads/ldns/ldns-${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=8ac84c16bdca60e710eea75782356f3ac3b55680d40e1530d7cea474ac208229
-MAGISK_MODULE_DEPENDS="openssl"
-MAGISK_MODULE_BREAKS="ldns-dev"
-MAGISK_MODULE_REPLACES="ldns-dev"
-MAGISK_MODULE_BUILD_IN_SRC=true
+TERMUX_PKG_HOMEPAGE=https://www.nlnetlabs.nl/projects/ldns/
+TERMUX_PKG_DESCRIPTION="Library for simplifying DNS programming and supporting recent and experimental RFCs"
+TERMUX_PKG_LICENSE="BSD 3-Clause"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.8.3
+TERMUX_PKG_REVISION=2
+TERMUX_PKG_SRCURL=https://www.nlnetlabs.nl/downloads/ldns/ldns-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=c3f72dd1036b2907e3a56e6acf9dfb2e551256b3c1bbd9787942deeeb70e7860
+TERMUX_PKG_DEPENDS="openssl, resolv-conf"
+TERMUX_PKG_BREAKS="ldns-dev"
+TERMUX_PKG_REPLACES="ldns-dev"
+TERMUX_PKG_BUILD_IN_SRC=true
 
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="
---with-ssl=$MAGISK_PREFIX
---enable-shared
---enable-static
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="
+--with-ssl=$TERMUX_PREFIX
 --disable-gost
 --with-drill
 "
 
-mmagisk_step_pre_configure() {
-	export CFLAGS+=" -DHAVE_ENDPROTOENT=0"
-	export CPPFLAGS=" -DHAVE_ENDPROTOENT=0"
-	export LDFLAGS+=" -static -levent -lssl -lcrypto -lz"
+termux_step_pre_configure() {
+	autoreconf -fi
 }
 
-magisk_step_post_make_install() {
+termux_step_post_make_install() {
 	# The ldns build doesn't install its pkg-config:
-	mkdir -p $MAGISK_PREFIX/lib/pkgconfig
-	find . -name "*libldns.pc*"
-	cp packaging/libldns.pc.in $MAGISK_PREFIX/lib/pkgconfig/libldns.pc
-}
-
-mmagisk_step_pre_configure() {
-	export LDFLAGS="$LDFLAGS -static"
-	export PATH=/usr/local/musl/bin:$PATH
-        TARGET=aarch64-linux-musl
-	export CC=${TARGET}-gcc
-	export GCC=${TARGET}-gcc
-	export LD=${TARGET}-ld
-	export AR=${TARGET}-ar
-	export RANLIB=${TARGET}-ranlib
-	export CFLAGS=" -z execstack"
-	C_INCLUDE_PATH=/usr/local/musl/aarch64-linux-musl/include
-	#./configure --prefix=$MAGISK_PREFIX --static
+	mkdir -p $TERMUX_PREFIX/lib/pkgconfig
+	cp packaging/libldns.pc $TERMUX_PREFIX/lib/pkgconfig/libldns.pc
 }

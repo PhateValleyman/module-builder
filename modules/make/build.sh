@@ -1,39 +1,44 @@
-MAGISK_MODULE_HOMEPAGE=https://www.gnu.org/software/make/
-MAGISK_MODULE_DESCRIPTION="Tool to control the generation of non-source files from source files"
-MAGISK_MODULE_LICENSE="GPL-3.0"
-MAGISK_MODULE_VERSION=4.3
-MAGISK_MODULE_REVISION=1
-MAGISK_MODULE_SRCURL=https://mirrors.kernel.org/gnu/make/make-${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=e05fdde47c5f7ca45cb697e973894ff4f5d79e13b750ed57d7b66d8defc78e19
-MAGISK_MODULE_BREAKS="make-dev"
-MAGISK_MODULE_REPLACES="make-dev"
-MAGISK_MODULE_DEPENDS="libandroid-spawn"
+TERMUX_PKG_HOMEPAGE=https://www.gnu.org/software/make/
+TERMUX_PKG_DESCRIPTION="Tool to control the generation of non-source files from source files"
+TERMUX_PKG_LICENSE="GPL-3.0"
+TERMUX_PKG_MAINTAINER="@termux"
+# Update both make and make-guile to the same version in one PR.
+TERMUX_PKG_VERSION=4.4.1
+TERMUX_PKG_SRCURL=https://mirrors.kernel.org/gnu/make/make-${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=dd16fb1d67bfab79a72f5e8390735c49e3e8e70b4945a15ab1f81ddb78658fb3
+TERMUX_PKG_BREAKS="make-dev"
+TERMUX_PKG_REPLACES="make-dev"
+TERMUX_PKG_GROUPS="base-devel"
 # Prevent linking against libelf:
-MAGISK_MODULE_EXTRA_CONFIGURE_ARGS="ac_cv_lib_elf_elf_begin=no"
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS="ac_cv_lib_elf_elf_begin=no"
+# Prevent linking against libiconv:
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" am_cv_func_iconv=no"
 
-magisk_step_pre_configure() {
-    if [ "$MAGISK_ARCH" = arm ]; then
-	# Fix issue with make on arm hanging at least under cmake:
-	# https://github.com/termux/termux-packages/issues/2983
-	MAGISK_MODULE_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_pselect=no"
-    fi
-    CFLAGS+=" -static -O2"
-    LDFLAGS+=" -static"
+TERMUX_PKG_CONFLICTS="make-guile"
+# Prevent linking against guile:
+TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" --without-guile"
+
+termux_step_pre_configure() {
+	if [ "$TERMUX_ARCH" = arm ]; then
+		# Fix issue with make on arm hanging at least under cmake:
+		# https://github.com/termux/termux-packages/issues/2983
+		TERMUX_PKG_EXTRA_CONFIGURE_ARGS+=" ac_cv_func_pselect=no"
+	fi
 }
 
-magisk_step_make() {
+termux_step_make() {
 	# Allow to bootstrap make if building on device without make installed.
-	#if $MAGISK_ON_DEVICE_BUILD && [ -z "$(command -v make)" ]; then
-	#	./build.sh
-	#else
-	make -j $MAGISK_MAKE_PROCESSES
-	#fi
+	if $TERMUX_ON_DEVICE_BUILD && [ -z "$(command -v make)" ]; then
+		./build.sh
+	else
+		make -j $TERMUX_MAKE_PROCESSES
+	fi
 }
 
-magisk_step_make_install() {
-	#if $MAGISK_ON_DEVICE_BUILD && [ -z "$(command -v make)" ]; then
-	#	./make -j 1 install
-	#else
-	make -j 1 install
-	#fi
+termux_step_make_install() {
+	if $TERMUX_ON_DEVICE_BUILD && [ -z "$(command -v make)" ]; then
+		./make -j 1 install
+	else
+		make -j 1 install
+	fi
 }

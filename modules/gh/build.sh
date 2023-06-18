@@ -1,36 +1,44 @@
-MAGISK_MODULE_HOMEPAGE=https://cli.github.com/
-MAGISK_MODULE_DESCRIPTION="GitHub’s official command line tool"
-MAGISK_MODULE_LICENSE="MIT"
-MAGISK_MODULE_MAINTAINER="Krishna kanhaiya @kcubeterm"
-MAGISK_MODULE_VERSION=1.2.0
-MAGISK_MODULE_SRCURL=https://github.com/cli/cli/archive/v${MAGISK_MODULE_VERSION}.tar.gz
-MAGISK_MODULE_SHA256=d2ff68475802292673b168c35f3f1443dd0068ad6f9e2ee11a260c843b548026
+TERMUX_PKG_HOMEPAGE=https://cli.github.com/
+TERMUX_PKG_DESCRIPTION="GitHub’s official command line tool"
+TERMUX_PKG_LICENSE="MIT"
+TERMUX_PKG_MAINTAINER="Krishna kanhaiya @kcubeterm"
+TERMUX_PKG_VERSION="2.29.0"
+TERMUX_PKG_SRCURL=https://github.com/cli/cli/archive/v${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=f77718f109ff5817cde33eb004137f58bdcd5934b921aed1440c6b3e93e1df27
+TERMUX_PKG_AUTO_UPDATE=true
 
-magisk_step_make() {
-	magisk_setup_golang
+termux_step_make() {
+	termux_setup_golang
 
-	cd "$MAGISK_MODULE_SRCDIR"
+	cd "$TERMUX_PKG_SRCDIR"
 	(
 		unset GOOS GOARCH CGO_LDFLAGS
 		unset CC CXX CFLAGS CXXFLAGS LDFLAGS
-		go run ./cmd/gen-docs --man-page --doc-path $MAGISK_PREFIX/share/man/man1/
+		go run ./cmd/gen-docs --man-page --doc-path $TERMUX_PREFIX/share/man/man1/
 	)
-	export GOPATH=$MAGISK_MODULE_BUILDDIR
-	export GOOS=linux
+	export GOPATH=$TERMUX_PKG_BUILDDIR
 	mkdir -p "$GOPATH"/src/github.com/cli/
-	mkdir -p "$MAGISK_PREFIX"/share/doc/gh
-	cp -a "$MAGISK_MODULE_SRCDIR" "$GOPATH"/src/github.com/cli/cli
-	#sudo chown builder:builder -R $GOPATH/..
-	#sudo chmod 755 -R $GOPATH/..
-	export PATH="/usr/local/musl/bin:$PATH"
-	export CC=aarch64-linux-musl-gcc
-	export GCC=$CC
+	mkdir -p "$TERMUX_PREFIX"/share/doc/gh
+	cp -a "$TERMUX_PKG_SRCDIR" "$GOPATH"/src/github.com/cli/cli
 	cd "$GOPATH"/src/github.com/cli/cli/cmd/gh
 	go get -d -v
-	go build -v -x -ldflags "-L /system/lib -linkmode external -extldflags \"-lc -ldl -static\""
+	go build -ldflags="-X github.com/cli/cli/v${TERMUX_PKG_VERSION%%.*}/internal/build.Version=$TERMUX_PKG_VERSION"
 }
 
-magisk_step_make_install() {
-	install -Dm700 -t "$MAGISK_PREFIX"/bin "$GOPATH"/src/github.com/cli/cli/cmd/gh/gh
-	#install -Dm600 -t "$MAGISK_PREFIX"/share/doc/gh/ "$MAGISK_MODULE_SRCDIR"/docs/*
+termux_step_make_install() {
+	install -Dm700 -t "$TERMUX_PREFIX"/bin "$GOPATH"/src/github.com/cli/cli/cmd/gh/gh
+	install -Dm600 -t "$TERMUX_PREFIX"/share/doc/gh/ "$TERMUX_PKG_SRCDIR"/docs/*
+
+	install -Dm644 /dev/null "$TERMUX_PREFIX"/share/bash-completion/completions/gh.bash
+	install -Dm644 /dev/null "$TERMUX_PREFIX"/share/zsh/site-functions/_gh
+	install -Dm644 /dev/null "$TERMUX_PREFIX"/share/fish/vendor_completions.d/gh.fish
+}
+
+termux_step_create_debscripts() {
+	cat <<-EOF >./postinst
+		#!${TERMUX_PREFIX}/bin/sh
+		gh completion -s bash > ${TERMUX_PREFIX}/share/bash-completion/completions/gh.bash
+		gh completion -s zsh > ${TERMUX_PREFIX}/share/zsh/site-functions/_gh
+		gh completion -s fish > ${TERMUX_PREFIX}/share/fish/vendor_completions.d/gh.fish
+	EOF
 }

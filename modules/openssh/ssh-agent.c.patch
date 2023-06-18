@@ -5,7 +5,7 @@
  
  #ifndef DEFAULT_ALLOWED_PROVIDERS
 -# define DEFAULT_ALLOWED_PROVIDERS "/usr/lib*/*,/usr/local/lib*/*"
-+# define DEFAULT_ALLOWED_PROVIDERS "@MAGISK_PREFIX@/lib*/*,@MAGISK_PREFIX@/local/lib*/*"
++# define DEFAULT_ALLOWED_PROVIDERS "@TERMUX_PREFIX@/lib*/*,@TERMUX_PREFIX@/local/lib*/*"
  #endif
  
  /* Maximum accepted message length */

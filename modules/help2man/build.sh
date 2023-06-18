@@ -1,15 +1,10 @@
-MAGISK_MODULE_HOMEPAGE=https://www.rarlab.com/
-MAGISK_MODULE_DESCRIPTION="Tool for extracting files from .rar archives"
-MAGISK_MODULE_LICENSE="non-free"
-MAGISK_MODULE_LICENSE_FILE="license.txt"
-MAGISK_MODULE_VERSION=1.47.16
-MAGISK_MODULE_REVISION=9
-MAGISK_MODULE_SRCURL=http://mirrors.kernel.org/gnu/help2man/help2man-1.47.15.tar.xz
-MAGISK_MODULE_SHA256=c25a35b30eceb315361484b0ff1f81c924e8ee5c8881576f1ee762f001dbcd1c
-MAGISK_MODULE_DEPENDS="libandroid-support, libc++"
-MAGISK_MODULE_BUILD_IN_SRC=true
-
-magisk_step_pre_configure(){
-	CFLAGS=" -static"
-	LDFLAGS=" --static"
-}
+TERMUX_PKG_HOMEPAGE=https://www.gnu.org/software/help2man/
+TERMUX_PKG_DESCRIPTION="Conversion tool to create man files"
+TERMUX_PKG_LICENSE="GPL-3.0"
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION=1.49.3
+TERMUX_PKG_SRCURL=http://mirrors.kernel.org/gnu/help2man/help2man-${TERMUX_PKG_VERSION}.tar.xz
+TERMUX_PKG_SHA256=4d7e4fdef2eca6afe07a2682151cea78781e0a4e8f9622142d9f70c083a2fd4f
+TERMUX_PKG_DEPENDS="perl"
+TERMUX_PKG_PLATFORM_INDEPENDENT=true
+TERMUX_PKG_BUILD_IN_SRC=true

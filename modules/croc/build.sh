@@ -1,20 +1,22 @@
-MAGISK_MODULE_HOMEPAGE=https://github.com/schollz/croc
-MAGISK_MODULE_DESCRIPTION="Easily and securely send things from one computer to another."
-MAGISK_MODULE_LICENSE=MIT
-MAGISK_MODULE_VERSION=8.5.1
-MAGISK_MODULE_SRCURL=https://github.com/schollz/croc/releases/download/v${MAGISK_MODULE_VERSION}/croc_${MAGISK_MODULE_VERSION}_src.tar.gz
-MAGISK_MODULE_SHA256=b76e5523a8c621ddbaf6dacf3e70c6f614b8a35d494be43412082e9bf7323df2
-MAGISK_MODULE_DEPENDS="libandroid-support"
-MAGISK_MODULE_BUILD_IN_SRC=true
+TERMUX_PKG_HOMEPAGE=https://github.com/schollz/croc
+TERMUX_PKG_DESCRIPTION="Easily and securely send things from one computer to another"
+TERMUX_PKG_LICENSE=MIT
+TERMUX_PKG_MAINTAINER="@termux"
+TERMUX_PKG_VERSION="9.6.4"
+TERMUX_PKG_REVISION=1
+TERMUX_PKG_SRCURL=https://github.com/schollz/croc/archive/refs/tags/v${TERMUX_PKG_VERSION}.tar.gz
+TERMUX_PKG_SHA256=e658f15c795da42286563ba5b71e213adfcd8849e5cfba4d3f8451b777c827b9
+TERMUX_PKG_AUTO_UPDATE=true
+TERMUX_PKG_BUILD_IN_SRC=true
 
-magisk_step_make() {
-	cd $MAGISK_MODULE_SRCDIR
+termux_step_make() {
+	cd $TERMUX_PKG_SRCDIR
 
-	magisk_setup_golang
+	termux_setup_golang
 
-	go build -v -o croc -trimpath -ldflags "-L /system/lib -linkmode external -extldflags \"-lc -static\""
+	go build -o croc -trimpath
 }
 
-magisk_step_make_install() {
-	install -m755 croc $MAGISK_PREFIX/bin/croc
+termux_step_make_install() {
+	install -m755 croc $TERMUX_PREFIX/bin/croc
 }

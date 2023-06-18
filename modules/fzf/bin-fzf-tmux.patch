@@ -15,10 +15,10 @@ diff -uNr fzf-0.24.2/bin/fzf-tmux fzf-0.24.2.mod/bin/fzf-tmux
 -fifo1="${TMPDIR:-/tmp}/fzf-fifo1-$id"
 -fifo2="${TMPDIR:-/tmp}/fzf-fifo2-$id"
 -fifo3="${TMPDIR:-/tmp}/fzf-fifo3-$id"
-+argsf="${TMPDIR:-/sdcard/tmp}/fzf-args-$id"
-+fifo1="${TMPDIR:-/sdcard/tmp}/fzf-fifo1-$id"
-+fifo2="${TMPDIR:-/sdcard/tmp}/fzf-fifo2-$id"
-+fifo3="${TMPDIR:-/sdcard/tmp}/fzf-fifo3-$id"
++argsf="${TMPDIR:-@TERMUX_PREFIX@/tmp}/fzf-args-$id"
++fifo1="${TMPDIR:-@TERMUX_PREFIX@/tmp}/fzf-fifo1-$id"
++fifo2="${TMPDIR:-@TERMUX_PREFIX@/tmp}/fzf-fifo2-$id"
++fifo3="${TMPDIR:-@TERMUX_PREFIX@/tmp}/fzf-fifo3-$id"
  tmux_win_opts=( $(tmux show-window-options remain-on-exit \; show-window-options synchronize-panes | sed '/ off/d; s/^/set-window-option /; s/$/ \\;/') )
  cleanup() {
    \rm -f $argsf $fifo1 $fifo2 $fifo3
